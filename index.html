@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestión de Códigos</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --success: #059669;
+            --success-light: #10b981;
+            --warning: #d97706;
+            --warning-light: #f59e0b;
+            --danger: #dc2626;
+            --danger-light: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --radius: 6px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.8125rem;
+            line-height: 1.3;
+            padding-bottom: 70px;
+            min-height: 100vh;
+            overscroll-behavior: none;
+        }
+
+        /* ===== HEADER COMPACTO ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 8px 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header-title {
+            font-size: 1rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-date {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .h-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .h-btn:active {
+            background: rgba(255,255,255,0.35);
+            transform: scale(0.95);
+        }
+
+        .sync-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.625rem;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
+        .sync-dot.error { background: #f87171; }
+        .sync-dot.offline { background: #94a3b8; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* ===== STATS COMPACTOS ===== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 4px 2px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 2px;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat:last-child { border-right: none; }
+
+        .stat-val {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-lbl {
+            font-size: 0.5625rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* ===== ALERTAS ===== */
+        .alert-bar {
+            background: #fef3c7;
+            border-bottom: 1px solid #fcd34d;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            color: #92400e;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .alert-bar.visible { display: flex; }
+
+        /* ===== QUEUE INDICATOR ===== */
+        .queue-indicator {
+            background: #dbeafe;
+            border-bottom: 1px solid #93c5fd;
+            padding: 4px 12px;
+            font-size: 0.6875rem;
+            color: #1e40af;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .queue-indicator.visible { display: flex; }
+
+        /* ===== BÚSQUEDA ===== */
+        .search-wrap {
+            padding: 6px 8px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 6px 10px 6px 30px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+            background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 10px center;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        /* ===== SECCIONES COMPACTAS ===== */
+        .section {
+            background: white;
+            margin: 4px 6px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-head:active { background: #f0f0f0; }
+
+        .section-head h2 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-head .cnt {
+            background: var(--primary);
+            color: white;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+        }
+
+        .section-head .arrow {
+            color: var(--text-muted);
+            font-size: 0.625rem;
+            transition: transform 0.2s;
+        }
+
+        .section.collapsed .section-body { display: none; }
+        .section.collapsed .arrow { transform: rotate(-90deg); }
+
+        .section-body { padding: 4px; }
+
+        /* ===== FILAS DE ASESORES ULTRA COMPACTAS ===== */
+        .asesor-row {
+            display: flex;
+            align-items: center;
+            padding: 3px 6px;
+            margin-bottom: 1px;
+            background: #f8fafc;
+            border-radius: 3px;
+            border-left: 3px solid var(--success);
+            gap: 4px;
+            min-height: 26px;
+            position: relative;
+            cursor: move;
+        }
+
+        .asesor-row:last-child { margin-bottom: 0; }
+        .asesor-row.inasistente { border-left-color: var(--danger); background: #fef2f2; }
+        .asesor-row.sin-codigo { border-left-color: var(--warning); background: #fffbeb; }
+        .asesor-row.lider { border-left-color: var(--primary); background: #eff6ff; }
+        .asesor-row.dragging { opacity: 0.4; background: #e0e7ff; }
+        .asesor-row.drag-over { border-top: 3px solid var(--primary); margin-top: -2px; }
+
+        /* Estilos para drop en secciones */
+        .section-body.drag-target {
+            background: #dbeafe;
+            border: 2px dashed var(--primary);
+            min-height: 50px;
+        }
+        .section-body.drag-target-inasist {
+            background: #fee2e2;
+            border: 2px dashed var(--danger);
+        }
+        .section-body.drag-target-lider {
+            background: #eff6ff;
+            border: 2px dashed var(--primary);
+        }
+
+        /* Drag Handle */
+        .drag-handle {
+            cursor: grab;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            user-select: none;
+        }
+
+        .drag-handle:active { cursor: grabbing; }
+
+        /* Status chip */
+        .status-chip {
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 1px 2px;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .status-chip:hover { background: rgba(0,0,0,0.05); }
+
+        /* Nombre editable */
+        .asesor-name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text);
+            cursor: pointer;
+            padding: 1px 4px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+            min-width: 60px;
+        }
+
+        .asesor-name:hover { background: rgba(0,0,0,0.03); }
+
+        .asesor-name.editing {
+            border: 1px solid var(--primary);
+            background: white;
+            outline: none;
+        }
+
+        .asesor-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+
+        .badge {
+            font-size: 0.5rem;
+            padding: 0px 3px;
+            border-radius: 2px;
+            font-weight: 600;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .badge-ojt { background: #dbeafe; color: var(--primary); }
+
+        /* Códigos inline */
+        .codes-inline {
+            font-family: 'SF Mono', Monaco, Consolas, monospace;
+            font-size: 0.6875rem;
+            color: var(--text);
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 2px;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .code-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 1px 4px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            cursor: pointer;
+            font-size: 0.6875rem;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .code-tag:hover { background: #cbd5e1; }
+        .code-tag.duplicado { background: #fecaca; color: var(--danger); }
+
+        .code-pass {
+            font-size: 0.5625rem;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+
+        .no-code {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.6875rem;
+        }
+
+        /* ===== MENÚ CONTEXTUAL ===== */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            min-width: 140px;
+            max-width: 200px;
+            max-height: 250px;
+            overflow-y: auto;
+            animation: fadeIn 0.15s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .context-menu-item {
+            padding: 8px 12px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .context-menu-item:last-child { border-bottom: none; }
+        .context-menu-item:hover { background: var(--bg); }
+        .context-menu-item.selected { background: #eff6ff; color: var(--primary); }
+
+        .context-menu-header {
+            padding: 6px 12px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .context-menu-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8125rem;
+            outline: none;
+        }
+
+        .context-menu-input:focus {
+            background: #eff6ff;
+        }
+
+        /* ===== LÍDERES COMPACTOS ===== */
+        .lideres-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .lider-card {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius);
+            padding: 6px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .lider-card:active { transform: scale(0.98); }
+
+        .lider-card .name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--primary-dark);
+        }
+
+        .lider-card .codes {
+            font-size: 0.6875rem;
+            font-family: monospace;
+            color: var(--text-muted);
+        }
+
+        /* ===== FAB ===== */
+        .fab {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .fab:active { transform: scale(0.95); background: var(--primary-dark); }
+        .fab.open { transform: rotate(45deg); }
+
+        .fab-menu {
+            position: fixed;
+            bottom: 74px;
+            right: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 90;
+        }
+
+        .fab-menu.open { display: flex; }
+
+        .fab-item {
+            background: white;
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fab-item:active { background: var(--bg); transform: translateX(-4px); }
+
+        /* ===== INLINE ADD FORM ===== */
+        .inline-add-form {
+            display: none;
+            padding: 8px;
+            background: #f0f9ff;
+            border: 1px dashed var(--primary);
+            border-radius: var(--radius);
+            margin: 4px 6px;
+        }
+
+        .inline-add-form.visible { display: block; }
+
+        .inline-add-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .inline-add-input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+        }
+
+        .inline-add-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .inline-add-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+            cursor: pointer;
+        }
+
+        .inline-add-btn.primary { background: var(--primary); color: white; }
+        .inline-add-btn.secondary { background: var(--border); color: var(--text); }
+
+        /* ===== HISTORIAL COMPACTO ===== */
+        .historial-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.6875rem;
+            background: white;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            border-left: 2px solid var(--primary);
+        }
+
+        .historial-fecha {
+            color: var(--text-muted);
+            font-size: 0.5625rem;
+            margin-bottom: 2px;
+        }
+
+        .historial-accion {
+            font-weight: 700;
+            color: white;
+            background: var(--primary);
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 0.5625rem;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 2px;
+        }
+
+        .historial-accion.transferencia { background: var(--warning); }
+        .historial-accion.eliminacion { background: var(--danger); }
+        .historial-accion.creacion { background: var(--success); }
+
+        .historial-detalle { color: var(--text); line-height: 1.3; }
+        .historial-codigo { font-family: monospace; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 0 2px; border-radius: 2px; }
+        .historial-asesor { font-weight: 600; }
+        .historial-flecha { color: var(--text-muted); margin: 0 3px; }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 250;
+            width: calc(100% - 24px);
+            max-width: 320px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+            margin-bottom: 6px;
+            animation: toastIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--shadow-lg);
+            pointer-events: auto;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+        .toast.info { background: var(--primary); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== LOADING ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.95);
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .loading-overlay.visible { display: flex; }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .offline-banner {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #1e293b;
+            color: white;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 0.75rem;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .offline-banner.visible { display: flex; }
+
+        .empty {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .empty-icon { font-size: 1.5rem; margin-bottom: 4px; }
+
+        /* Overlay para cerrar menús */
+        .menu-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 999;
+            display: none;
+        }
+
+        .menu-overlay.visible { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <span style="font-size: 0.8125rem; color: var(--text-muted);">Cargando...</span>
+    </div>
+
+    <!-- Offline Banner -->
+    <div class="offline-banner" id="offlineBanner">
+        <span>📴</span>
+        <span>Sin conexión - Cambios guardados localmente</span>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-container" id="toasts"></div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay" onclick="App.ui.closeAllMenus()"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-row">
+            <div class="header-info">
+                <div class="header-title" id="teamName">Equipo</div>
+                <div class="header-date" id="teamDate"></div>
+            </div>
+            <div class="header-actions">
+                <button class="h-btn" onclick="App.sync.forceSync()" title="Sincronizar">🔄</button>
+            </div>
+        </div>
+        <div class="sync-badge">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncText">Conectando...</span>
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-val" id="sTotal">0</div>
+            <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val" id="sAsist">0</div>
+            <div class="stat-lbl">Asistentes</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val" id="sInasist">0</div>
+            <div class="stat-lbl">Inasist.</div>
+        </div>
+        <div class="stat">
+            <div class="stat-val" id="sCodigos">0</div>
+            <div class="stat-lbl">Códigos</div>
+        </div>
+    </div>
+
+    <!-- Alertas -->
+    <div class="alert-bar" id="alertBar" onclick="App.ui.showAlerts()">
+        <span>⚠️</span>
+        <span id="alertText">0 alertas</span>
+        <span style="margin-left:auto;">Ver ›</span>
+    </div>
+
+    <!-- Cola -->
+    <div class="queue-indicator" id="queueIndicator">
+        <span>🔄</span>
+        <span id="queueText">0 pendientes</span>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="search-wrap">
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar asesor o código...">
+    </div>
+
+    <!-- Formulario inline para agregar -->
+    <div class="inline-add-form" id="addForm">
+        <div class="inline-add-row">
+            <input type="text" class="inline-add-input" id="addNombre" placeholder="Nombre del asesor">
+            <input type="text" class="inline-add-input" id="addCodigo" placeholder="Código" style="width:80px;">
+            <input type="text" class="inline-add-input" id="addClave" placeholder="Clave" style="width:60px;">
+            <button class="inline-add-btn primary" onclick="App.actions.quickAddAsesor()">✓</button>
+            <button class="inline-add-btn secondary" onclick="App.ui.hideAddForm()">✕</button>
+        </div>
+    </div>
+
+    <!-- Sección Inasistencias -->
+    <section class="section" id="secInasist">
+        <div class="section-head" onclick="App.ui.toggleSection('secInasist')">
+            <h2>❌ Inasistencias <span class="cnt" id="cntInasist">0</span></h2>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="section-body" id="listInasist"></div>
+    </section>
+
+    <!-- Líderes -->
+    <section class="section" id="secLideres">
+        <div class="section-head" onclick="App.ui.toggleSection('secLideres')">
+            <h2>👑 Líderes <span class="cnt" id="cntLideres">0</span></h2>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="section-body" id="listLideres"></div>
+    </section>
+
+    <!-- Asesores -->
+    <section class="section" id="secAsesores">
+        <div class="section-head" onclick="App.ui.toggleSection('secAsesores')">
+            <h2>👥 Asesores <span class="cnt" id="cntAsesores">0</span></h2>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="section-body" id="listAsesores"></div>
+    </section>
+
+    <!-- Historial -->
+    <section class="section collapsed" id="secHistorial">
+        <div class="section-head" onclick="App.ui.toggleSection('secHistorial')">
+            <h2>📋 Historial <span class="cnt" id="cntHistorial">0</span></h2>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="section-body" id="listHistorial"></div>
+    </section>
+
+    <!-- FAB -->
+    <div class="fab-menu" id="fabMenu">
+        <div class="fab-item" onclick="App.ui.showAddForm()">👤 Agregar asesor</div>
+        <div class="fab-item" onclick="App.actions.copyFormat()">📋 Copiar formato</div>
+        <div class="fab-item" onclick="App.ui.toggleSection('secHistorial'); App.ui.closeFab();">📜 Ver historial</div>
+        <div class="fab-item" onclick="App.sync.forceSync()">🔄 Sincronizar ahora</div>
+        <div class="fab-item" onclick="App.actions.exportBackup()">💾 Exportar backup</div>
+    </div>
+    <button class="fab" id="fabBtn" onclick="App.ui.toggleFab()">+</button>
+
+<script>
+// ============================================================
+// APLICACIÓN - Gestión de Códigos v6.0 CORREGIDA
+// ============================================================
+
+const App = (function() {
+    'use strict';
+
+    // ===================== CONFIGURACIÓN =====================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxgz0yIfmySUmgw-CZ2j1dNnHjsnnqg9hMSU63rva_q1soxojTalm2Bxlzyl75GVhTp/exec';
+    const STORAGE_KEY = 'gestion_codigos_v6';
+    const QUEUE_KEY = 'gestion_codigos_queue_v6';
+    const CLIENT_ID = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+
+    // ===================== ESTADO GLOBAL =====================
+    const state = {
+        asesores: [],
+        codigos: [],
+        config: { Equipo: 'Equipo' },
+        alerts: [],
+        historial: [],
+        version: 0,
+        isOnline: navigator.onLine,
+        isSyncing: false,
+        lastSync: null
+    };
+
+    let operationQueue = [];
+    let jsonpCounter = 0;
+    let syncTimer = null;
+
+    // Variables para sincronización optimista
+    const pendingOps = {
+        eliminar: {},
+        crear: {},
+        actualizar: {},
+        mover: false
+    };
+    const TIMEOUT_OP = 15000;
+    const GRACE_TIME = 3000;
+
+    // ===================== UTILIDADES =====================
+    const Utils = {
+        genId: () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8),
+        genOpId: () => 'op_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8),
+        debounce: (fn, delay) => {
+            let timer;
+            return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+        },
+        escapeHtml: (str) => {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        },
+        getCurrentDate: () => {
+            const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            const now = new Date();
+            return `${dias[now.getDay()]} ${now.getDate()} de ${meses[now.getMonth()]}`;
+        }
+    };
+
+    // ===================== ALMACENAMIENTO =====================
+    const Storage = {
+        saveState: () => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    asesores: state.asesores,
+                    codigos: state.codigos,
+                    config: state.config,
+                    historial: state.historial,
+                    version: state.version,
+                    lastSync: state.lastSync
+                }));
+            } catch (e) { console.error('Error guardando:', e); }
+        },
+        loadState: () => {
+            try {
+                const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (data && data.asesores) { Object.assign(state, data); return true; }
+            } catch (e) {}
+            return false;
+        },
+        saveQueue: () => {
+            try { localStorage.setItem(QUEUE_KEY, JSON.stringify(operationQueue)); } catch (e) {}
+        },
+        loadQueue: () => {
+            try {
+                const queue = JSON.parse(localStorage.getItem(QUEUE_KEY));
+                if (Array.isArray(queue)) { operationQueue = queue; return true; }
+            } catch (e) {}
+            operationQueue = [];
+            return false;
+        },
+        clearQueue: () => {
+            operationQueue = [];
+            localStorage.removeItem(QUEUE_KEY);
+        }
+    };
+
+    // ===================== API =====================
+    const API = {
+        call: (params, timeout = 15000) => {
+            return new Promise((resolve, reject) => {
+                jsonpCounter++;
+                const callbackName = 'cb' + jsonpCounter + '_' + Date.now();
+                let timeoutId, resolved = false;
+
+                window[callbackName] = (response) => {
+                    if (resolved) return;
+                    resolved = true;
+                    clearTimeout(timeoutId);
+                    delete window[callbackName];
+                    document.getElementById('s_' + callbackName)?.remove();
+                    resolve(response);
+                };
+
+                timeoutId = setTimeout(() => {
+                    if (resolved) return;
+                    resolved = true;
+                    delete window[callbackName];
+                    document.getElementById('s_' + callbackName)?.remove();
+                    reject(new Error('Timeout'));
+                }, timeout);
+
+                let url = API_URL + '?callback=' + callbackName + '&_=' + Date.now();
+                for (const key in params) {
+                    const val = typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key];
+                    url += '&' + key + '=' + encodeURIComponent(val);
+                }
+
+                const script = document.createElement('script');
+                script.id = 's_' + callbackName;
+                script.src = url;
+                script.onerror = () => {
+                    if (resolved) return;
+                    resolved = true;
+                    clearTimeout(timeoutId);
+                    delete window[callbackName];
+                    script.remove();
+                    reject(new Error('Red'));
+                };
+                document.body.appendChild(script);
+            });
+        },
+        getData: async () => {
+            const response = await API.call({ action: 'getData' }, 15000);
+            if (response?.success) return response.data;
+            throw new Error(response?.error || 'Error');
+        },
+        syncBatch: async (operations) => {
+            const data = JSON.stringify({ action: 'syncBatch', operations, clientId: CLIENT_ID });
+            return API.call({ action: 'syncBatch', data }, 20000);
+        }
+    };
+
+    // ===================== SINCRONIZACIÓN SIMPLIFICADA =====================
+    const Sync = {
+        enqueue: (type, data) => {
+            const operation = {
+                operationId: Utils.genOpId(),
+                type,
+                data,
+                timestamp: Date.now(),
+                retries: 0,
+                status: 'pending'
+            };
+            operationQueue.push(operation);
+            Storage.saveQueue();
+            Sync.updateQueueIndicator();
+            Sync.scheduleSync();
+            return operation.operationId;
+        },
+        
+        scheduleSync: () => {
+            if (syncTimer) clearTimeout(syncTimer);
+            syncTimer = setTimeout(() => {
+                syncTimer = null;
+                Sync.processQueue();
+            }, 2000);
+        },
+        
+        processQueue: async () => {
+            if (state.isSyncing || !state.isOnline) return;
+            
+            const pendingOps = operationQueue.filter(op => op.status === 'pending');
+            if (pendingOps.length === 0) {
+                UI.setSyncStatus('synced', 'Sincronizado');
+                return;
+            }
+
+            state.isSyncing = true;
+            UI.setSyncStatus('syncing', 'Guardando ' + pendingOps.length + '...');
+
+            try {
+                const batch = pendingOps.slice(0, 10);
+                const response = await API.syncBatch(batch);
+                
+                if (response?.success && response.results) {
+                    response.results.forEach(result => {
+                        const idx = operationQueue.findIndex(op => op.operationId === result.operationId);
+                        if (idx !== -1) {
+                            if (result.success || result.skipped) {
+                                operationQueue.splice(idx, 1);
+                            } else {
+                                operationQueue[idx].retries++;
+                                if (operationQueue[idx].retries >= 3) {
+                                    operationQueue.splice(idx, 1);
+                                }
+                            }
+                        }
+                    });
+                    Storage.saveQueue();
+                    
+                    const remaining = operationQueue.filter(op => op.status === 'pending');
+                    if (remaining.length > 0) {
+                        setTimeout(() => Sync.processQueue(), 1000);
+                    } else {
+                        UI.setSyncStatus('synced', 'Sincronizado');
+                    }
+                } else {
+                    throw new Error('Respuesta inválida');
+                }
+            } catch (error) {
+                console.error('Error sync:', error);
+                UI.setSyncStatus('error', 'Error - Reintentando...');
+                setTimeout(() => Sync.processQueue(), 5000);
+            } finally {
+                state.isSyncing = false;
+                Sync.updateQueueIndicator();
+            }
+        },
+        
+        forceSync: async () => {
+            if (state.isSyncing) return;
+            
+            if (pendingOps.mover || Object.keys(pendingOps.eliminar).length > 0 || 
+                Object.keys(pendingOps.crear).length > 0 || Object.keys(pendingOps.actualizar).length > 0) {
+                UI.setSyncStatus('syncing', 'Guardando cambios...');
+                setTimeout(() => Sync.forceSync(), 2000);
+                return;
+            }
+            
+            UI.setSyncStatus('syncing', 'Cargando...');
+            
+            try {
+                const data = await API.getData();
+                if (data) {
+                    let asesoresFiltrados = data.asesores || [];
+                    let codigosFiltrados = data.codigos || [];
+                    
+                    const ahora = Date.now();
+                    
+                    for (const id in pendingOps.eliminar) {
+                        if (ahora - pendingOps.eliminar[id] < TIMEOUT_OP) {
+                            asesoresFiltrados = asesoresFiltrados.filter(a => a.ID !== id);
+                            codigosFiltrados = codigosFiltrados.filter(c => c.ID !== id);
+                        } else {
+                            delete pendingOps.eliminar[id];
+                        }
+                    }
+                    
+                    for (const tempId in pendingOps.crear) {
+                        if (ahora - pendingOps.crear[tempId] > TIMEOUT_OP) {
+                            delete pendingOps.crear[tempId];
+                        }
+                    }
+                    
+                    state.asesores = asesoresFiltrados;
+                    state.codigos = codigosFiltrados;
+                    if (data.config) state.config = data.config;
+                    if (data.historial) state.historial = data.historial;
+                    state.version = data.version || Date.now();
+                    state.lastSync = new Date().toISOString();
+                    Storage.saveState();
+                    Render.all();
+                    UI.toast('Datos actualizados', 'success');
+                }
+                UI.setSyncStatus('synced', 'Sincronizado');
+                
+                if (operationQueue.length > 0) {
+                    setTimeout(() => Sync.processQueue(), 500);
+                }
+            } catch (error) {
+                console.error('Error forceSync:', error);
+                if (state.asesores.length > 0) {
+                    UI.setSyncStatus('offline', 'Modo local');
+                    Render.all();
+                } else {
+                    UI.setSyncStatus('error', 'Sin datos');
+                }
+            }
+        },
+        
+        updateQueueIndicator: () => {
+            const pending = operationQueue.filter(op => op.status === 'pending').length;
+            const indicator = document.getElementById('queueIndicator');
+            if (pending > 0) {
+                indicator.classList.add('visible');
+                document.getElementById('queueText').textContent = pending + ' pendiente' + (pending > 1 ? 's' : '');
+            } else {
+                indicator.classList.remove('visible');
+            }
+        }
+    };
+
+    // ===================== CRUD =====================
+    const CRUD = {
+        addAsesor: (datos) => {
+            const maxPos = state.asesores.reduce((max, a) => Math.max(max, a.Posicion || 0), 0);
+            const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+            const asesor = {
+                ID: tempId,
+                Nombre: datos.nombre,
+                Rol: datos.rol || 'asesor',
+                Estado: datos.estado || 'asistente',
+                Posicion: maxPos + 1,
+                Observaciones: datos.obs || '',
+                OJT: datos.ojt || false
+            };
+            
+            pendingOps.crear[tempId] = Date.now();
+            
+            state.asesores.push(asesor);
+            Storage.saveState();
+            Render.all();
+            
+            const asesorParaServidor = { ...asesor, ID: Utils.genId() };
+            const idReal = asesorParaServidor.ID;
+            
+            const opId = Sync.enqueue('addAsesor', asesorParaServidor);
+            
+            const checkSuccess = setInterval(() => {
+                const op = operationQueue.find(o => o.operationId === opId);
+                if (!op) {
+                    clearInterval(checkSuccess);
+                    const idx = state.asesores.findIndex(a => a.ID === tempId);
+                    if (idx !== -1) {
+                        state.asesores[idx].ID = idReal;
+                        Storage.saveState();
+                    }
+                    setTimeout(() => {
+                        delete pendingOps.crear[tempId];
+                    }, GRACE_TIME);
+                }
+            }, 500);
+            
+            setTimeout(() => {
+                clearInterval(checkSuccess);
+                if (pendingOps.crear[tempId]) {
+                    delete pendingOps.crear[tempId];
+                }
+            }, TIMEOUT_OP);
+            
+            if (datos.codigo) {
+                setTimeout(() => {
+                    const asesorActual = state.asesores.find(a => a.ID === tempId || a.ID === idReal);
+                    if (asesorActual) {
+                        CRUD.addCodigo(asesorActual.ID, datos.codigo, datos.clave);
+                    }
+                }, 100);
+            }
+            
+            return asesor;
+        },
+        
+        updateAsesor: (id, cambios) => {
+            const idx = state.asesores.findIndex(a => a.ID === id);
+            if (idx === -1) return false;
+            Object.assign(state.asesores[idx], cambios);
+            Storage.saveState();
+            Sync.enqueue('updateAsesor', { ID: id, ...cambios });
+            Render.all();
+            return true;
+        },
+        
+        deleteAsesor: (id) => {
+            const asesorEliminado = state.asesores.find(a => a.ID === id);
+            const indiceEliminado = state.asesores.findIndex(a => a.ID === id);
+            
+            if (!asesorEliminado) return false;
+            
+            pendingOps.eliminar[id] = Date.now();
+            
+            const codigosAsesor = state.codigos.filter(c => c.AsesorID === id);
+            codigosAsesor.forEach(c => {
+                c.AsesorID = '';
+                Sync.enqueue('updateCodigo', { ID: c.ID, AsesorID: '' });
+            });
+            
+            state.asesores = state.asesores.filter(a => a.ID !== id);
+            Storage.saveState();
+            Render.all();
+            
+            const opId = Sync.enqueue('deleteAsesor', { ID: id });
+            
+            const checkSuccess = setInterval(() => {
+                const op = operationQueue.find(o => o.operationId === opId);
+                if (!op) {
+                    clearInterval(checkSuccess);
+                    setTimeout(() => {
+                        delete pendingOps.eliminar[id];
+                    }, GRACE_TIME);
+                }
+            }, 500);
+            
+            setTimeout(() => {
+                clearInterval(checkSuccess);
+                if (pendingOps.eliminar[id]) {
+                    delete pendingOps.eliminar[id];
+                }
+            }, TIMEOUT_OP);
+            
+            return true;
+        },
+        
+        addCodigo: (asesorId, codigo, pass) => {
+            const c = {
+                ID: Utils.genId(),
+                Codigo: codigo,
+                Contrasena: pass || '',
+                AsesorID: asesorId
+            };
+            state.codigos.push(c);
+            Storage.saveState();
+            Sync.enqueue('addCodigo', c);
+            Render.all();
+            return c;
+        },
+        
+        updateCodigo: (id, cambios) => {
+            const idx = state.codigos.findIndex(c => c.ID === id);
+            if (idx === -1) return false;
+            Object.assign(state.codigos[idx], cambios);
+            Storage.saveState();
+            Sync.enqueue('updateCodigo', { ID: id, ...cambios });
+            Render.all();
+            return true;
+        },
+        
+        transferCodigo: (codigoId, nuevoAsesorId) => {
+            const codigo = state.codigos.find(c => c.ID === codigoId);
+            if (!codigo) return false;
+            
+            const asesorOrigen = state.asesores.find(a => a.ID === codigo.AsesorID);
+            const asesorDestino = state.asesores.find(a => a.ID === nuevoAsesorId);
+            
+            CRUD.registrarMovimiento('Transferencia', codigo.Codigo,
+                asesorOrigen ? asesorOrigen.Nombre : 'Sin asignar',
+                asesorDestino ? asesorDestino.Nombre : 'Sin asignar');
+            
+            CRUD.updateCodigo(codigoId, { AsesorID: nuevoAsesorId });
+            return true;
+        },
+        
+        registrarMovimiento: (accion, codigo, de, a) => {
+            const mov = {
+                fecha: new Date().toLocaleString(),
+                accion,
+                codigo,
+                de,
+                a
+            };
+            state.historial.unshift(mov);
+            if (state.historial.length > 50) state.historial.pop();
+            Sync.enqueue('registrarMovimiento', mov);
+            Render.historial();
+        },
+        
+        // FUNCIÓN PRINCIPAL PARA REORDENAR
+        reorderSection: (seccion) => {
+            let lista;
+            if (seccion === 'lider') {
+                lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
+            } else if (seccion === 'inasist') {
+                lista = state.asesores.filter(a => a.Estado === 'inasistente');
+            } else {
+                lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
+            }
+            
+            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+            
+            const orden = [];
+            lista.forEach((asesor, index) => {
+                const nuevaPos = index + 1;
+                const stateIdx = state.asesores.findIndex(a => a.ID === asesor.ID);
+                if (stateIdx !== -1) {
+                    state.asesores[stateIdx].Posicion = nuevaPos;
+                }
+                orden.push({ ID: asesor.ID, posicion: nuevaPos });
+            });
+            
+            Storage.saveState();
+            
+            if (orden.length > 0) {
+                Sync.enqueue('reorderAsesores', { orden });
+            }
+        }
+    };
+
+    // ===================== RENDERIZADO =====================
+    const Render = {
+        all: () => {
+            Render.config();
+            Render.stats();
+            Render.inasistencias();
+            Render.lideres();
+            Render.asesores();
+            Render.historial();
+            Render.detectAlerts();
+        },
+        config: () => {
+            document.getElementById('teamName').textContent = state.config.Equipo || 'Equipo';
+            document.getElementById('teamDate').textContent = Utils.getCurrentDate();
+        },
+        stats: () => {
+            const total = state.asesores.length;
+            const asist = state.asesores.filter(a => a.Estado !== 'inasistente').length;
+            const inasist = total - asist;
+            const codes = state.codigos.filter(c => {
+                const a = state.asesores.find(x => x.ID === c.AsesorID);
+                return a && a.Estado !== 'inasistente';
+            }).length;
+            document.getElementById('sTotal').textContent = total;
+            document.getElementById('sAsist').textContent = asist;
+            document.getElementById('sInasist').textContent = inasist;
+            document.getElementById('sCodigos').textContent = codes;
+        },
+        inasistencias: () => {
+            const lista = state.asesores.filter(a => a.Estado === 'inasistente');
+            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+            document.getElementById('cntInasist').textContent = lista.length;
+            const container = document.getElementById('listInasist');
+            if (lista.length === 0) {
+                container.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div>Sin inasistencias</div>';
+            } else {
+                container.innerHTML = lista.map(a => Render.asesorRow(a, 'inasist')).join('');
+            }
+        },
+        lideres: () => {
+            const lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
+            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+            document.getElementById('cntLideres').textContent = lista.length;
+            const container = document.getElementById('listLideres');
+            if (lista.length === 0) {
+                container.innerHTML = '<div class="empty">Sin líderes</div>';
+            } else {
+                container.innerHTML = lista.map(a => Render.asesorRow(a, 'lider')).join('');
+            }
+        },
+        asesores: () => {
+            const busqueda = document.getElementById('searchInput').value.toLowerCase();
+            let lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
+            if (busqueda) {
+                lista = lista.filter(a => {
+                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
+                    return a.Nombre.toLowerCase().includes(busqueda) ||
+                           codes.some(c => c.Codigo.toLowerCase().includes(busqueda));
+                });
+            }
+            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+            document.getElementById('cntAsesores').textContent = lista.length;
+            const container = document.getElementById('listAsesores');
+            if (lista.length === 0) {
+                container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Sin asesores</div>';
+            } else {
+                container.innerHTML = lista.map(a => Render.asesorRow(a, 'asesor')).join('');
+            }
+        },
+        asesorRow: (a, section) => {
+            const codes = state.codigos.filter(c => c.AsesorID === a.ID);
+            const statusMap = {
+                'inasistente': { emoji: '❌', class: 'inasistente' },
+                'sin-codigo': { emoji: '⚠️', class: 'sin-codigo' },
+                'asistente': { emoji: '✅', class: '' }
+            };
+            const status = statusMap[a.Estado] || statusMap['asistente'];
+            const rowClass = section === 'lider' ? 'lider' : status.class;
+
+            const dupIds = [];
+            state.alerts.forEach(alert => { if (alert.ids) dupIds.push(...alert.ids); });
+
+            let codesHtml;
+            if (codes.length === 0) {
+                codesHtml = '<span class="no-code">(sin código)</span>';
+            } else {
+                codesHtml = codes.map(c => {
+                    const isDup = dupIds.includes(c.ID);
+                    const cls = isDup ? 'duplicado' : '';
+                    const passStr = c.Contrasena ? `<span class="code-pass">${Utils.escapeHtml(c.Contrasena)}</span>` : '';
+                    return `<span class="code-tag ${cls}" onclick="event.stopPropagation();App.ui.showCodeMenu('${c.ID}','${a.ID}',event)">${Utils.escapeHtml(c.Codigo)}${passStr}</span>`;
+                }).join('');
+            }
+
+            const badges = a.OJT ? '<span class="badge badge-ojt">OJT</span>' : '';
+
+            return `
+                <div class="asesor-row ${rowClass}" draggable="false" data-id="${a.ID}" data-section="${section}">
+                    <span class="drag-handle">⋮⋮</span>
+                    <span class="status-chip" onclick="event.stopPropagation();App.ui.showStatusMenu('${a.ID}',event)">${status.emoji}</span>
+                    <div class="asesor-main">
+                        <span class="asesor-name" onclick="event.stopPropagation();App.ui.editNameInline('${a.ID}',this)">${Utils.escapeHtml(a.Nombre)}</span>
+                        ${badges}
+                        <span style="color:#94a3b8;margin:0 2px;">—</span>
+                        <span class="codes-inline">${codesHtml}</span>
+                    </div>
+                    <button style="border:none;background:none;font-size:0.75rem;cursor:pointer;padding:2px;" onclick="event.stopPropagation();App.ui.showRowMenu('${a.ID}',event)">⋯</button>
+                </div>
+            `;
+        },
+        historial: () => {
+            document.getElementById('cntHistorial').textContent = state.historial.length;
+            const container = document.getElementById('listHistorial');
+            if (state.historial.length === 0) {
+                container.innerHTML = '<div class="empty">Sin movimientos</div>';
+            } else {
+                container.innerHTML = state.historial.slice(0, 30).map(h => {
+                    let accionClass = h.accion === 'Transferencia' ? 'transferencia' : '';
+                    return `
+                        <div class="historial-item">
+                            <div class="historial-fecha">📅 ${Utils.escapeHtml(h.fecha)}</div>
+                            <span class="historial-accion ${accionClass}">${Utils.escapeHtml(h.accion)}</span>
+                            <div class="historial-detalle">
+                                <span class="historial-codigo">${Utils.escapeHtml(h.codigo)}</span>
+                                <span class="historial-asesor">${Utils.escapeHtml(h.de)}</span>
+                                <span class="historial-flecha">→</span>
+                                <span class="historial-asesor">${Utils.escapeHtml(h.a)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        },
+        detectAlerts: () => {
+            state.alerts = [];
+            const conteo = {};
+            state.codigos.forEach(c => {
+                const key = c.Codigo.toLowerCase().trim();
+                if (!conteo[key]) conteo[key] = [];
+                conteo[key].push(c);
+            });
+            Object.entries(conteo).forEach(([key, items]) => {
+                if (items.length > 1) {
+                    const nombres = items.map(c => {
+                        const a = state.asesores.find(x => x.ID === c.AsesorID);
+                        return a ? a.Nombre : '?';
+                    });
+                    state.alerts.push({
+                        type: 'duplicate',
+                        msg: `"${items[0].Codigo}" duplicado en: ${nombres.join(', ')}`,
+                        ids: items.map(c => c.ID)
+                    });
+                }
+            });
+            const bar = document.getElementById('alertBar');
+            const txt = document.getElementById('alertText');
+            if (state.alerts.length > 0) {
+                bar.classList.add('visible');
+                txt.textContent = state.alerts.length + ' alerta' + (state.alerts.length > 1 ? 's' : '');
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+    };
+
+    // ===================== INTERFAZ =====================
+    const UI = {
+        toggleSection: (id) => document.getElementById(id).classList.toggle('collapsed'),
+        toggleFab: () => {
+            document.getElementById('fabMenu').classList.toggle('open');
+            document.getElementById('fabBtn').classList.toggle('open');
+        },
+        closeFab: () => {
+            document.getElementById('fabMenu').classList.remove('open');
+            document.getElementById('fabBtn').classList.remove('open');
+        },
+        toast: (msg, type = 'info') => {
+            const container = document.getElementById('toasts');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        },
+        setSyncStatus: (status, text) => {
+            document.getElementById('syncDot').className = 'sync-dot ' + status;
+            document.getElementById('syncText').textContent = text;
+        },
+        showLoading: (show) => document.getElementById('loading').classList.toggle('visible', show),
+
+        closeAllMenus: () => {
+            document.querySelectorAll('.context-menu').forEach(m => m.remove());
+            document.getElementById('menuOverlay').classList.remove('visible');
+        },
+
+        showContextMenu: (html, x, y) => {
+            UI.closeAllMenus();
+            const menu = document.createElement('div');
+            menu.className = 'context-menu';
+            menu.innerHTML = html;
+            document.body.appendChild(menu);
+
+            const rect = menu.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width - 10;
+            const maxY = window.innerHeight - rect.height - 10;
+            menu.style.left = Math.min(x, maxX) + 'px';
+            menu.style.top = Math.min(y, maxY) + 'px';
+
+            document.getElementById('menuOverlay').classList.add('visible');
+            return menu;
+        },
+
+        showStatusMenu: (asesorId, event) => {
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (!a) return;
+            const estados = [
+                { value: 'asistente', emoji: '✅', label: 'Asistente' },
+                { value: 'inasistente', emoji: '❌', label: 'Inasistente' },
+                { value: 'sin-codigo', emoji: '⚠️', label: 'Sin código' }
+            ];
+            const html = estados.map(e => `
+                <div class="context-menu-item ${a.Estado === e.value ? 'selected' : ''}" onclick="App.actions.setStatus('${asesorId}','${e.value}')">${e.emoji} ${e.label}</div>
+            `).join('');
+            UI.showContextMenu(html, event.clientX, event.clientY);
+        },
+
+        showCodeMenu: (codigoId, asesorId, event) => {
+            const codigo = state.codigos.find(c => c.ID === codigoId);
+            if (!codigo) return;
+
+            const otros = state.asesores.filter(a => a.ID !== asesorId);
+            const transferHtml = otros.slice(0, 10).map(a => {
+                const icon = a.Estado === 'inasistente' ? '❌' : '✅';
+                return `<div class="context-menu-item" onclick="App.actions.transferCode('${codigoId}','${a.ID}')">${icon} ${Utils.escapeHtml(a.Nombre)}</div>`;
+            }).join('');
+
+            const html = `
+                <div class="context-menu-header">Editar clave</div>
+                <input class="context-menu-input" type="text" value="${Utils.escapeHtml(codigo.Contrasena || '')}" placeholder="Clave" onchange="App.actions.updateCodePass('${codigoId}',this.value)">
+                <div class="context-menu-header">Transferir a</div>
+                ${transferHtml || '<div class="context-menu-item" style="color:var(--text-muted)">No hay otros asesores</div>'}
+            `;
+            UI.showContextMenu(html, event.clientX, event.clientY);
+        },
+
+        showRowMenu: (asesorId, event) => {
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (!a) return;
+
+            const html = `
+                <div class="context-menu-item" onclick="App.ui.toggleOJT('${asesorId}')">${a.OJT ? '✓ ' : ''}OJT</div>
+                <div class="context-menu-item" onclick="App.ui.promptAddCode('${asesorId}')">➕ Agregar código</div>
+                <div class="context-menu-item" onclick="App.actions.moveToLider('${asesorId}')">👑 Mover a Líderes</div>
+                <div class="context-menu-item" onclick="App.actions.moveToAsesor('${asesorId}')">👥 Mover a Asesores</div>
+                <div class="context-menu-item" style="color:var(--danger)" onclick="App.actions.confirmDelete('${asesorId}')">🗑️ Eliminar asesor</div>
+            `;
+            UI.showContextMenu(html, event.clientX, event.clientY);
+        },
+
+        editNameInline: (asesorId, element) => {
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (!a) return;
+
+            element.contentEditable = true;
+            element.classList.add('editing');
+            element.focus();
+
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            const save = () => {
+                element.contentEditable = false;
+                element.classList.remove('editing');
+                const newName = element.textContent.trim();
+                if (newName && newName !== a.Nombre) {
+                    CRUD.updateAsesor(asesorId, { Nombre: newName });
+                    UI.toast('Nombre actualizado', 'success');
+                } else {
+                    element.textContent = a.Nombre;
+                }
+            };
+
+            element.onblur = save;
+            element.onkeydown = (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); element.blur(); }
+                if (e.key === 'Escape') { element.textContent = a.Nombre; element.blur(); }
+            };
+        },
+
+        toggleOJT: (asesorId) => {
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (a) {
+                CRUD.updateAsesor(asesorId, { OJT: !a.OJT });
+                UI.toast(a.OJT ? 'OJT desactivado' : 'OJT activado', 'success');
+            }
+            UI.closeAllMenus();
+        },
+
+        promptAddCode: (asesorId) => {
+            UI.closeAllMenus();
+            const codigo = prompt('Código:');
+            if (codigo) {
+                const clave = prompt('Clave (opcional):');
+                CRUD.addCodigo(asesorId, codigo.trim(), clave ? clave.trim() : '');
+                UI.toast('Código agregado', 'success');
+            }
+        },
+
+        showAddForm: () => {
+            UI.closeFab();
+            const form = document.getElementById('addForm');
+            form.classList.add('visible');
+            document.getElementById('addNombre').focus();
+        },
+
+        hideAddForm: () => {
+            const form = document.getElementById('addForm');
+            form.classList.remove('visible');
+            document.getElementById('addNombre').value = '';
+            document.getElementById('addCodigo').value = '';
+            document.getElementById('addClave').value = '';
+        },
+
+        showAlerts: () => {
+            if (state.alerts.length === 0) {
+                UI.toast('Sin alertas', 'success');
+                return;
+            }
+            let msg = 'ALERTAS:\n\n';
+            state.alerts.forEach(a => { msg += '⚠️ ' + a.msg + '\n'; });
+            alert(msg);
+        }
+    };
+
+    // ===================== ACCIONES =====================
+    const Actions = {
+        setStatus: (asesorId, estado) => {
+            CRUD.updateAsesor(asesorId, { Estado: estado });
+            UI.closeAllMenus();
+            UI.toast('Estado actualizado', 'success');
+        },
+
+        transferCode: (codigoId, toId) => {
+            CRUD.transferCodigo(codigoId, toId);
+            UI.closeAllMenus();
+            UI.toast('Código transferido', 'success');
+        },
+
+        updateCodePass: (codigoId, pass) => {
+            CRUD.updateCodigo(codigoId, { Contrasena: pass });
+            UI.closeAllMenus();
+            UI.toast('Clave actualizada', 'success');
+        },
+
+        moveToLider: (asesorId) => {
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (!a) return;
+            
+            // Calcular nueva posición al final de líderes
+            const lideres = state.asesores.filter(x => x.Rol === 'lider' && x.Estado !== 'inasistente');
+            const maxPos = lideres.reduce((max, x) => Math.max(max, x.Posicion || 0), 0);
+            
+            a.Rol = 'lider';
+            a.Estado = 'asistente';
+            a.Posicion = maxPos + 1;
+            
+            Storage.saveState();
+            Sync.enqueue('updateAsesor', { ID: asesorId, Rol: 'lider', Estado: 'asistente', Posicion: a.Posicion });
+            Render.all();
+            
+            UI.closeAllMenus();
+            UI.toast('Movido a Líderes', 'success');
+        },
+
+        moveToAsesor: (asesorId) => {
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (!a) return;
+            
+            // Calcular nueva posición al final de asesores
+            const asesores = state.asesores.filter(x => x.Rol !== 'lider' && x.Estado !== 'inasistente');
+            const maxPos = asesores.reduce((max, x) => Math.max(max, x.Posicion || 0), 0);
+            
+            a.Rol = 'asesor';
+            a.Estado = 'asistente';
+            a.Posicion = maxPos + 1;
+            
+            Storage.saveState();
+            Sync.enqueue('updateAsesor', { ID: asesorId, Rol: 'asesor', Estado: 'asistente', Posicion: a.Posicion });
+            Render.all();
+            
+            UI.closeAllMenus();
+            UI.toast('Movido a Asesores', 'success');
+        },
+
+        confirmDelete: (asesorId) => {
+            UI.closeAllMenus();
+            const a = state.asesores.find(x => x.ID === asesorId);
+            if (!a) return;
+            const codes = state.codigos.filter(c => c.AsesorID === asesorId);
+            let msg = `¿Eliminar a ${a.Nombre}?`;
+            if (codes.length > 0) {
+                msg += `\n\nSus ${codes.length} código(s) quedarán sin asignar.`;
+            }
+            if (confirm(msg)) {
+                CRUD.deleteAsesor(asesorId);
+                UI.toast('Asesor eliminado', 'success');
+            }
+        },
+
+        quickAddAsesor: () => {
+            const nombre = document.getElementById('addNombre').value.trim();
+            const codigo = document.getElementById('addCodigo').value.trim();
+            const clave = document.getElementById('addClave').value.trim();
+
+            if (!nombre) {
+                UI.toast('Ingresa un nombre', 'warning');
+                return;
+            }
+
+            CRUD.addAsesor({ nombre, codigo, clave, rol: 'asesor', estado: 'asistente' });
+            UI.hideAddForm();
+            UI.toast('Asesor agregado', 'success');
+        },
+
+        copyFormat: () => {
+            let txt = state.config.Equipo + ' – ' + Utils.getCurrentDate() + '\n\n';
+
+            const inasist = state.asesores.filter(a => a.Estado === 'inasistente');
+            if (inasist.length > 0) {
+                txt += 'Inasistencias:\n\n';
+                inasist.forEach(a => {
+                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
+                    const cStr = codes.length > 0 ? codes.map(c => c.Codigo).join(' y ') : 'sin código';
+                    const ojt = a.OJT ? ' OJT' : '';
+                    txt += a.Nombre + ojt + ' — ' + cStr + ' ❌\n';
+                });
+                txt += '\n';
+            }
+
+            txt += 'Asistentes:\n\n';
+
+            const lideres = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
+            lideres.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+            if (lideres.length > 0) {
+                txt += 'Líderes:\n\n';
+                lideres.forEach(a => {
+                    txt += a.Nombre + ' ✅\n';
+                    state.codigos.filter(c => c.AsesorID === a.ID).forEach(c => { txt += c.Codigo + '\n'; });
+                    txt += '\n';
+                });
+            }
+
+            const asesores = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
+            asesores.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+            if (asesores.length > 0) {
+                txt += 'Asesores:\n\n';
+                asesores.forEach(a => {
+                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
+                    let cStr = codes.length === 0 ? 'sin código' : codes.map(c => {
+                        let s = c.Codigo;
+                        if (c.Contrasena) s += ' (clave: ' + c.Contrasena + ')';
+                        return s;
+                    }).join(' y ');
+                    const ojt = a.OJT ? ' OJT' : '';
+                    const emoji = a.Estado === 'sin-codigo' ? '⚠️' : '✅';
+                    txt += a.Nombre + ojt + ' — ' + cStr + ' ' + emoji + '\n';
+                });
+            }
+
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(txt).then(() => UI.toast('Formato copiado', 'success')).catch(() => Actions.fallbackCopy(txt));
+            } else Actions.fallbackCopy(txt);
+            UI.closeFab();
+        },
+
+        fallbackCopy: (txt) => {
+            const ta = document.createElement('textarea');
+            ta.value = txt;
+            ta.style.cssText = 'position:fixed;left:-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); UI.toast('Copiado', 'success'); }
+            catch (e) { UI.toast('Error al copiar', 'error'); }
+            document.body.removeChild(ta);
+        },
+
+        exportBackup: () => {
+            const data = {
+                asesores: state.asesores,
+                codigos: state.codigos,
+                config: state.config,
+                historial: state.historial,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            UI.toast('Backup descargado', 'success');
+            UI.closeFab();
+        }
+    };
+
+    // ===================== DRAG & DROP ENTRE SECCIONES =====================
+    let draggedElement = null;
+    let draggedId = null;
+    let draggedSection = null;
+    let canDrag = false;
+
+    const setupDragDrop = () => {
+        // Detectar si el click fue en el handle
+        document.addEventListener('mousedown', (e) => {
+            const handle = e.target.closest('.drag-handle');
+            if (handle) {
+                canDrag = true;
+                const row = handle.closest('.asesor-row');
+                if (row) {
+                    row.setAttribute('draggable', 'true');
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            canDrag = false;
+            document.querySelectorAll('.asesor-row').forEach(row => {
+                row.setAttribute('draggable', 'false');
+            });
+        });
+
+        // INICIO DEL ARRASTRE
+        document.addEventListener('dragstart', (e) => {
+            const row = e.target.closest('.asesor-row');
+            
+            if (!row || !canDrag) {
+                e.preventDefault();
+                return;
+            }
+            
+            draggedElement = row;
+            draggedId = row.dataset.id;
+            draggedSection = row.dataset.section;
+            
+            row.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedId);
+            
+            setTimeout(() => {
+                document.querySelectorAll('.section-body').forEach(sb => {
+                    const section = sb.closest('.section');
+                    if (section) {
+                        if (section.id === 'secInasist') {
+                            sb.classList.add('drag-target-inasist');
+                        } else if (section.id === 'secLideres') {
+                            sb.classList.add('drag-target-lider');
+                        } else {
+                            sb.classList.add('drag-target');
+                        }
+                    }
+                });
+            }, 10);
+        });
+
+        // FIN DEL ARRASTRE
+        document.addEventListener('dragend', () => {
+            canDrag = false;
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement.setAttribute('draggable', 'false');
+            }
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
+                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
+            });
+            document.querySelectorAll('.asesor-row').forEach(row => {
+                row.setAttribute('draggable', 'false');
+            });
+            draggedElement = null;
+            draggedId = null;
+            draggedSection = null;
+        });
+
+        // MIENTRAS SE ARRASTRA
+        document.addEventListener('dragover', (e) => {
+            if (!draggedId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const row = e.target.closest('.asesor-row');
+            
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            
+            if (row && row.dataset.id !== draggedId) {
+                row.classList.add('drag-over');
+            }
+        });
+
+        // SALIR DEL ÁREA
+        document.addEventListener('dragleave', (e) => {
+            const row = e.target.closest('.asesor-row');
+            if (row && !row.contains(e.relatedTarget)) {
+                row.classList.remove('drag-over');
+            }
+        });
+
+        // SOLTAR
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
+                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
+            });
+            
+            if (!draggedId) return;
+            
+            const targetRow = e.target.closest('.asesor-row');
+            const sectionBody = e.target.closest('.section-body');
+            
+            if (targetRow && targetRow.dataset.id !== draggedId) {
+                // Soltar sobre otra fila
+                const targetId = targetRow.dataset.id;
+                const targetSection = targetRow.dataset.section;
+                handleMove(draggedId, targetId, draggedSection, targetSection);
+            } else if (sectionBody && !targetRow) {
+                // Soltar en área vacía de una sección
+                const section = sectionBody.closest('.section');
+                if (section) {
+                    let targetSection = 'asesor';
+                    if (section.id === 'secInasist') targetSection = 'inasist';
+                    else if (section.id === 'secLideres') targetSection = 'lider';
+                    
+                    if (draggedSection !== targetSection) {
+                        handleDropOnSection(draggedId, draggedSection, targetSection);
+                    }
+                }
+            }
+        });
+    };
+
+    const handleDropOnSection = (fromId, fromSection, toSection) => {
+        const fromAsesor = state.asesores.find(a => a.ID === fromId);
+        if (!fromAsesor) return;
+        
+        pendingOps.mover = Date.now();
+        
+        // Cambiar rol/estado según la sección destino
+        if (toSection === 'lider') {
+            fromAsesor.Rol = 'lider';
+            fromAsesor.Estado = 'asistente';
+        } else if (toSection === 'inasist') {
+            fromAsesor.Estado = 'inasistente';
+        } else {
+            fromAsesor.Rol = 'asesor';
+            fromAsesor.Estado = 'asistente';
+        }
+        
+        // Calcular nueva posición al final de la sección
+        let lista;
+        if (toSection === 'lider') {
+            lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente' && a.ID !== fromId);
+        } else if (toSection === 'inasist') {
+            lista = state.asesores.filter(a => a.Estado === 'inasistente' && a.ID !== fromId);
+        } else {
+            lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente' && a.ID !== fromId);
+        }
+        
+        const maxPos = lista.reduce((max, a) => Math.max(max, a.Posicion || 0), 0);
+        fromAsesor.Posicion = maxPos + 1;
+        
+        Storage.saveState();
+        Render.all();
+        
+        // Sincronizar con servidor
+        Sync.enqueue('updateAsesor', {
+            ID: fromId,
+            Rol: fromAsesor.Rol,
+            Estado: fromAsesor.Estado,
+            Posicion: fromAsesor.Posicion
+        });
+        
+        setTimeout(() => {
+            pendingOps.mover = false;
+        }, GRACE_TIME);
+        
+        UI.toast('Movido a ' + (toSection === 'lider' ? 'Líderes' : toSection === 'inasist' ? 'Inasistencias' : 'Asesores'), 'success');
+    };
+
+    const handleMove = (fromId, toId, fromSection, toSection) => {
+        const fromAsesor = state.asesores.find(a => a.ID === fromId);
+        const toAsesor = state.asesores.find(a => a.ID === toId);
+        
+        if (!fromAsesor || !toAsesor) return;
+        
+        pendingOps.mover = Date.now();
+        
+        const cambiaSeccion = fromSection !== toSection;
+        
+        // Si cambia de sección, actualizar rol/estado
+        if (cambiaSeccion) {
+            if (toSection === 'lider') {
+                fromAsesor.Rol = 'lider';
+                fromAsesor.Estado = 'asistente';
+            } else if (toSection === 'inasist') {
+                fromAsesor.Estado = 'inasistente';
+            } else {
+                fromAsesor.Rol = 'asesor';
+                fromAsesor.Estado = 'asistente';
+            }
+        }
+        
+        // Obtener lista de la sección destino
+        let lista;
+        if (toSection === 'lider') {
+            lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
+        } else if (toSection === 'inasist') {
+            lista = state.asesores.filter(a => a.Estado === 'inasistente');
+        } else {
+            lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
+        }
+        
+        lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
+        
+        // Remover el elemento arrastrado si está en la lista
+        const fromIdx = lista.findIndex(a => a.ID === fromId);
+        if (fromIdx !== -1) {
+            lista.splice(fromIdx, 1);
+        }
+        
+        // Encontrar posición del target
+        const toIdx = lista.findIndex(a => a.ID === toId);
+        if (toIdx === -1) {
+            // Si no encuentra el target, agregar al final
+            lista.push(fromAsesor);
+        } else {
+            // Insertar antes del target
+            lista.splice(toIdx, 0, fromAsesor);
+        }
+        
+        // Reasignar posiciones
+        const ordenNuevo = [];
+        lista.forEach((asesor, index) => {
+            const nuevaPos = index + 1;
+            const stateIdx = state.asesores.findIndex(a => a.ID === asesor.ID);
+            if (stateIdx !== -1) {
+                state.asesores[stateIdx].Posicion = nuevaPos;
+            }
+            ordenNuevo.push({ ID: asesor.ID, posicion: nuevaPos });
+        });
+        
+        Storage.saveState();
+        Render.all();
+        
+        // Sincronizar
+        if (cambiaSeccion) {
+            Sync.enqueue('updateAsesor', {
+                ID: fromId,
+                Rol: fromAsesor.Rol,
+                Estado: fromAsesor.Estado
+            });
+        }
+        
+        Sync.enqueue('reorderAsesores', { orden: ordenNuevo });
+        
+        setTimeout(() => {
+            pendingOps.mover = false;
+        }, GRACE_TIME);
+        
+        UI.toast('Posición actualizada', 'success');
+    };
+
+    // ===================== INICIALIZACIÓN =====================
+    const init = () => {
+        Storage.loadState();
+        Storage.loadQueue();
+
+        if (state.asesores.length > 0) {
+            Render.all();
+            UI.showLoading(false);
+            UI.setSyncStatus('synced', 'Datos locales');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', Utils.debounce(Render.asesores, 150));
+
+        document.addEventListener('click', (e) => {
+            const fab = document.getElementById('fabBtn');
+            const menu = document.getElementById('fabMenu');
+            if (!fab.contains(e.target) && !menu.contains(e.target)) UI.closeFab();
+        });
+
+        document.getElementById('addNombre').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') Actions.quickAddAsesor();
+            if (e.key === 'Escape') UI.hideAddForm();
+        });
+
+        // Setup drag & drop
+        setupDragDrop();
+
+        window.addEventListener('online', () => {
+            state.isOnline = true;
+            document.getElementById('offlineBanner').classList.remove('visible');
+            Sync.forceSync();
+        });
+
+        window.addEventListener('offline', () => {
+            state.isOnline = false;
+            document.getElementById('offlineBanner').classList.add('visible');
+            UI.setSyncStatus('offline', 'Sin conexión');
+        });
+
+        Sync.updateQueueIndicator();
+
+        if (state.isOnline) {
+            Sync.forceSync().finally(() => UI.showLoading(false));
+        } else {
+            UI.showLoading(false);
+        }
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    return {
+        state,
+        ui: UI,
+        actions: Actions,
+        sync: Sync,
+        crud: CRUD,
+        utils: Utils,
+        storage: Storage
+    };
+})();
+</script>
+</body>
+</html>
