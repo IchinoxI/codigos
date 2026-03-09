@@ -1873,14 +1873,18 @@ const App = (function() {
         }
     };
 
-    // ===================== DRAG & DROP ENTRE SECCIONES =====================
+    // ===================== DRAG & DROP ENTRE SECCIONES (MOUSE + TOUCH) =====================
     let draggedElement = null;
     let draggedId = null;
     let draggedSection = null;
     let canDrag = false;
+    let touchClone = null;
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let isTouchDragging = false;
 
     const setupDragDrop = () => {
-        // Detectar si el click fue en el handle
+        // ========== EVENTOS MOUSE (PC) ==========
         document.addEventListener('mousedown', (e) => {
             const handle = e.target.closest('.drag-handle');
             if (handle) {
@@ -1899,74 +1903,36 @@ const App = (function() {
             });
         });
 
-        // INICIO DEL ARRASTRE
         document.addEventListener('dragstart', (e) => {
             const row = e.target.closest('.asesor-row');
-            
             if (!row || !canDrag) {
                 e.preventDefault();
                 return;
             }
-            
             draggedElement = row;
             draggedId = row.dataset.id;
             draggedSection = row.dataset.section;
-            
             row.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', draggedId);
-            
-            setTimeout(() => {
-                document.querySelectorAll('.section-body').forEach(sb => {
-                    const section = sb.closest('.section');
-                    if (section) {
-                        if (section.id === 'secInasist') {
-                            sb.classList.add('drag-target-inasist');
-                        } else if (section.id === 'secLideres') {
-                            sb.classList.add('drag-target-lider');
-                        } else {
-                            sb.classList.add('drag-target');
-                        }
-                    }
-                });
-            }, 10);
+            setTimeout(() => { mostrarZonasDestino(); }, 10);
         });
 
-        // FIN DEL ARRASTRE
         document.addEventListener('dragend', () => {
-            canDrag = false;
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
-                draggedElement.setAttribute('draggable', 'false');
-            }
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
-                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
-            });
-            document.querySelectorAll('.asesor-row').forEach(row => {
-                row.setAttribute('draggable', 'false');
-            });
-            draggedElement = null;
-            draggedId = null;
-            draggedSection = null;
+            finalizarArrastre();
         });
 
-        // MIENTRAS SE ARRASTRA
         document.addEventListener('dragover', (e) => {
             if (!draggedId) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
-            
             const row = e.target.closest('.asesor-row');
-            
             document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            
             if (row && row.dataset.id !== draggedId) {
                 row.classList.add('drag-over');
             }
         });
 
-        // SALIR DEL ÁREA
         document.addEventListener('dragleave', (e) => {
             const row = e.target.closest('.asesor-row');
             if (row && !row.contains(e.relatedTarget)) {
@@ -1974,39 +1940,195 @@ const App = (function() {
             }
         });
 
-        // SOLTAR
         document.addEventListener('drop', (e) => {
             e.preventDefault();
+            procesarDrop(e.target);
+        });
+
+        // ========== EVENTOS TOUCH (MÓVIL) ==========
+        document.addEventListener('touchstart', (e) => {
+            const handle = e.target.closest('.drag-handle');
+            if (!handle) return;
             
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
-                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
-            });
+            const row = handle.closest('.asesor-row');
+            if (!row) return;
             
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            
+            draggedElement = row;
+            draggedId = row.dataset.id;
+            draggedSection = row.dataset.section;
+            
+            // Esperar un momento para confirmar que es un arrastre
+            setTimeout(() => {
+                if (draggedId && !isTouchDragging) {
+                    iniciarArrastreTactil(row, touch);
+                }
+            }, 150);
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
             if (!draggedId) return;
             
-            const targetRow = e.target.closest('.asesor-row');
-            const sectionBody = e.target.closest('.section-body');
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - touchStartX);
+            const deltaY = Math.abs(touch.clientY - touchStartY);
             
-            if (targetRow && targetRow.dataset.id !== draggedId) {
-                // Soltar sobre otra fila
-                const targetId = targetRow.dataset.id;
-                const targetSection = targetRow.dataset.section;
-                handleMove(draggedId, targetId, draggedSection, targetSection);
-            } else if (sectionBody && !targetRow) {
-                // Soltar en área vacía de una sección
-                const section = sectionBody.closest('.section');
-                if (section) {
-                    let targetSection = 'asesor';
-                    if (section.id === 'secInasist') targetSection = 'inasist';
-                    else if (section.id === 'secLideres') targetSection = 'lider';
-                    
-                    if (draggedSection !== targetSection) {
-                        handleDropOnSection(draggedId, draggedSection, targetSection);
-                    }
+            // Si se movió suficiente, es un arrastre
+            if (!isTouchDragging && (deltaX > 10 || deltaY > 10)) {
+                iniciarArrastreTactil(draggedElement, touch);
+            }
+            
+            if (isTouchDragging) {
+                e.preventDefault();
+                moverElementoTactil(touch);
+                detectarObjetivoTactil(touch);
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            if (!draggedId) return;
+            
+            if (isTouchDragging) {
+                const touch = e.changedTouches[0];
+                const elementoDebajo = document.elementFromPoint(touch.clientX, touch.clientY);
+                procesarDrop(elementoDebajo);
+            }
+            
+            finalizarArrastre();
+        });
+
+        document.addEventListener('touchcancel', () => {
+            finalizarArrastre();
+        });
+    };
+
+    const iniciarArrastreTactil = (row, touch) => {
+        isTouchDragging = true;
+        row.classList.add('dragging');
+        
+        // Crear clon visual que sigue el dedo
+        touchClone = row.cloneNode(true);
+        touchClone.style.cssText = `
+            position: fixed;
+            top: ${touch.clientY - 20}px;
+            left: ${touch.clientX - 50}px;
+            width: ${row.offsetWidth}px;
+            opacity: 0.8;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            pointer-events: none;
+            border-radius: 6px;
+            transform: scale(1.02);
+        `;
+        document.body.appendChild(touchClone);
+        
+        mostrarZonasDestino();
+        
+        // Vibración táctil si está disponible
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    };
+
+    const moverElementoTactil = (touch) => {
+        if (touchClone) {
+            touchClone.style.top = (touch.clientY - 20) + 'px';
+            touchClone.style.left = (touch.clientX - 50) + 'px';
+        }
+    };
+
+    const detectarObjetivoTactil = (touch) => {
+        // Ocultar temporalmente el clon para detectar qué hay debajo
+        if (touchClone) touchClone.style.display = 'none';
+        
+        const elementoDebajo = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        if (touchClone) touchClone.style.display = 'block';
+        
+        // Limpiar marcadores anteriores
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        
+        if (elementoDebajo) {
+            const row = elementoDebajo.closest('.asesor-row');
+            if (row && row.dataset.id !== draggedId) {
+                row.classList.add('drag-over');
+            }
+        }
+    };
+
+    const mostrarZonasDestino = () => {
+        document.querySelectorAll('.section-body').forEach(sb => {
+            const section = sb.closest('.section');
+            if (section) {
+                if (section.id === 'secInasist') {
+                    sb.classList.add('drag-target-inasist');
+                } else if (section.id === 'secLideres') {
+                    sb.classList.add('drag-target-lider');
+                } else {
+                    sb.classList.add('drag-target');
                 }
             }
         });
+    };
+
+    const finalizarArrastre = () => {
+        canDrag = false;
+        isTouchDragging = false;
+        
+        if (touchClone) {
+            touchClone.remove();
+            touchClone = null;
+        }
+        
+        if (draggedElement) {
+            draggedElement.classList.remove('dragging');
+            draggedElement.setAttribute('draggable', 'false');
+        }
+        
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
+            el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
+        });
+        document.querySelectorAll('.asesor-row').forEach(row => {
+            row.setAttribute('draggable', 'false');
+        });
+        
+        draggedElement = null;
+        draggedId = null;
+        draggedSection = null;
+    };
+
+    const procesarDrop = (elementoDestino) => {
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
+            el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
+        });
+        
+        if (!draggedId || !elementoDestino) return;
+        
+        const targetRow = elementoDestino.closest('.asesor-row');
+        const sectionBody = elementoDestino.closest('.section-body');
+        
+        if (targetRow && targetRow.dataset.id !== draggedId) {
+            const targetId = targetRow.dataset.id;
+            const targetSection = targetRow.dataset.section;
+            handleMove(draggedId, targetId, draggedSection, targetSection);
+        } else if (sectionBody) {
+            const section = sectionBody.closest('.section');
+            if (section) {
+                let targetSection = 'asesor';
+                if (section.id === 'secInasist') targetSection = 'inasist';
+                else if (section.id === 'secLideres') targetSection = 'lider';
+                
+                if (draggedSection !== targetSection) {
+                    handleDropOnSection(draggedId, draggedSection, targetSection);
+                }
+            }
+        }
     };
 
     const handleDropOnSection = (fromId, fromSection, toSection) => {
@@ -2015,7 +2137,6 @@ const App = (function() {
         
         pendingOps.mover = Date.now();
         
-        // Cambiar rol/estado según la sección destino
         if (toSection === 'lider') {
             fromAsesor.Rol = 'lider';
             fromAsesor.Estado = 'asistente';
@@ -2026,7 +2147,6 @@ const App = (function() {
             fromAsesor.Estado = 'asistente';
         }
         
-        // Calcular nueva posición al final de la sección
         let lista;
         if (toSection === 'lider') {
             lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente' && a.ID !== fromId);
@@ -2042,7 +2162,6 @@ const App = (function() {
         Storage.saveState();
         Render.all();
         
-        // Sincronizar con servidor
         Sync.enqueue('updateAsesor', {
             ID: fromId,
             Rol: fromAsesor.Rol,
@@ -2054,6 +2173,7 @@ const App = (function() {
             pendingOps.mover = false;
         }, GRACE_TIME);
         
+        if (navigator.vibrate) navigator.vibrate(30);
         UI.toast('Movido a ' + (toSection === 'lider' ? 'Líderes' : toSection === 'inasist' ? 'Inasistencias' : 'Asesores'), 'success');
     };
 
@@ -2067,7 +2187,6 @@ const App = (function() {
         
         const cambiaSeccion = fromSection !== toSection;
         
-        // Si cambia de sección, actualizar rol/estado
         if (cambiaSeccion) {
             if (toSection === 'lider') {
                 fromAsesor.Rol = 'lider';
@@ -2080,7 +2199,6 @@ const App = (function() {
             }
         }
         
-        // Obtener lista de la sección destino
         let lista;
         if (toSection === 'lider') {
             lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
@@ -2092,23 +2210,16 @@ const App = (function() {
         
         lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
         
-        // Remover el elemento arrastrado si está en la lista
         const fromIdx = lista.findIndex(a => a.ID === fromId);
-        if (fromIdx !== -1) {
-            lista.splice(fromIdx, 1);
-        }
+        if (fromIdx !== -1) lista.splice(fromIdx, 1);
         
-        // Encontrar posición del target
         const toIdx = lista.findIndex(a => a.ID === toId);
         if (toIdx === -1) {
-            // Si no encuentra el target, agregar al final
             lista.push(fromAsesor);
         } else {
-            // Insertar antes del target
             lista.splice(toIdx, 0, fromAsesor);
         }
         
-        // Reasignar posiciones
         const ordenNuevo = [];
         lista.forEach((asesor, index) => {
             const nuevaPos = index + 1;
@@ -2122,7 +2233,6 @@ const App = (function() {
         Storage.saveState();
         Render.all();
         
-        // Sincronizar
         if (cambiaSeccion) {
             Sync.enqueue('updateAsesor', {
                 ID: fromId,
@@ -2137,6 +2247,7 @@ const App = (function() {
             pendingOps.mover = false;
         }, GRACE_TIME);
         
+        if (navigator.vibrate) navigator.vibrate(30);
         UI.toast('Posición actualizada', 'success');
     };
 
