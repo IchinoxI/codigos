@@ -1274,7 +1274,8 @@ const App = (function() {
                 return;
             }
             
-            UI.setSyncStatus('syncing', 'Cargando...');
+            state.isSyncing = true;
+            UI.setSyncStatus('syncing', 'Sincronizando...');
             
             try {
                 const data = await API.getData();
@@ -1305,23 +1306,26 @@ const App = (function() {
                     if (data.historial) state.historial = data.historial;
                     state.version = data.version || Date.now();
                     state.lastSync = new Date().toISOString();
+                    state.isOnline = true;
                     Storage.saveState();
                     Render.all();
-                    UI.toast('Datos actualizados', 'success');
-                }
-                UI.setSyncStatus('synced', 'Sincronizado');
-                
-                if (operationQueue.length > 0) {
-                    setTimeout(() => Sync.processQueue(), 500);
+                    UI.setSyncStatus('synced', 'Sincronizado ✓');
+                    
+                    if (operationQueue.length > 0) {
+                        setTimeout(() => Sync.processQueue(), 500);
+                    }
                 }
             } catch (error) {
                 console.error('Error forceSync:', error);
+                state.isOnline = false;
                 if (state.asesores.length > 0) {
                     UI.setSyncStatus('offline', 'Modo local');
                     Render.all();
                 } else {
-                    UI.setSyncStatus('error', 'Sin datos');
+                    UI.setSyncStatus('error', 'Error de conexión');
                 }
+            } finally {
+                state.isSyncing = false;
             }
         },
         
@@ -1547,11 +1551,11 @@ const App = (function() {
         all: () => {
             Render.config();
             Render.stats();
+            Render.detectAlerts();
             Render.inasistencias();
             Render.lideres();
             Render.asesores();
             Render.historial();
-            Render.detectAlerts();
         },
         config: () => {
             document.getElementById('teamName').textContent = state.config.Equipo || 'Equipo';
@@ -1765,15 +1769,26 @@ const App = (function() {
             // Actualizar barra de alertas
             const bar = document.getElementById('alertBar');
             const txt = document.getElementById('alertText');
+            const arrow = document.getElementById('alertArrow');
+            
             if (state.alerts.length > 0) {
                 bar.classList.add('visible');
                 txt.textContent = state.alerts.length + ' alerta' + (state.alerts.length > 1 ? 's' : '');
+                
+                // Renderizar y mostrar panel automáticamente
+                Render.alertsPanel();
+                
+                // Mostrar panel automáticamente si hay alertas
+                const panel = document.getElementById('alertsPanel');
+                panel.classList.add('visible');
+                arrow.textContent = 'Ocultar ▼';
             } else {
                 bar.classList.remove('visible');
-                document.getElementById('alertsPanel').classList.remove('visible');
+                const panel = document.getElementById('alertsPanel');
+                panel.classList.remove('visible');
+                panel.innerHTML = '';
+                arrow.textContent = 'Ver ›';
             }
-            
-            Render.alertsPanel();
         }
     };
 
@@ -1839,8 +1854,14 @@ const App = (function() {
             }, 2500);
         },
         setSyncStatus: (status, text) => {
-            document.getElementById('syncDot').className = 'sync-dot ' + status;
-            document.getElementById('syncText').textContent = text;
+            const dot = document.getElementById('syncDot');
+            const textEl = document.getElementById('syncText');
+            
+            if (dot) dot.className = 'sync-dot ' + status;
+            if (textEl) textEl.textContent = text;
+            
+            // Log para debug
+            console.log('Estado sync:', status, text);
         },
         showLoading: (show) => document.getElementById('loading').classList.toggle('visible', show),
 
@@ -1991,6 +2012,15 @@ const App = (function() {
                 panel.classList.remove('visible');
                 arrow.textContent = 'Ver ›';
             } else {
+                panel.classList.add('visible');
+                arrow.textContent = 'Ocultar ▼';
+            }
+        },
+
+        showAlertsIfNeeded: () => {
+            if (state.alerts.length > 0) {
+                const panel = document.getElementById('alertsPanel');
+                const arrow = document.getElementById('alertArrow');
                 panel.classList.add('visible');
                 arrow.textContent = 'Ocultar ▼';
             }
@@ -2585,10 +2615,13 @@ const App = (function() {
         Storage.loadState();
         Storage.loadQueue();
 
+        // Mostrar datos locales primero si existen
         if (state.asesores.length > 0) {
             Render.all();
-            UI.showLoading(false);
-            UI.setSyncStatus('synced', 'Datos locales');
+            UI.setSyncStatus('syncing', 'Conectando...');
+        } else {
+            UI.showLoading(true);
+            UI.setSyncStatus('syncing', 'Cargando datos...');
         }
 
         document.getElementById('searchInput').addEventListener('input', Utils.debounce(Render.asesores, 150));
@@ -2610,6 +2643,7 @@ const App = (function() {
         window.addEventListener('online', () => {
             state.isOnline = true;
             document.getElementById('offlineBanner').classList.remove('visible');
+            UI.toast('Conexión restaurada', 'success');
             Sync.forceSync();
         });
 
@@ -2621,10 +2655,14 @@ const App = (function() {
 
         Sync.updateQueueIndicator();
 
+        // Sincronizar inmediatamente
         if (state.isOnline) {
-            Sync.forceSync().finally(() => UI.showLoading(false));
+            Sync.forceSync().finally(() => {
+                UI.showLoading(false);
+            });
         } else {
             UI.showLoading(false);
+            UI.setSyncStatus('offline', 'Sin conexión');
         }
     };
 
