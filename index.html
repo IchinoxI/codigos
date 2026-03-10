@@ -1812,60 +1812,54 @@ const App = (function() {
                 txt.textContent = state.alerts.length + ' alerta' + (state.alerts.length > 1 ? 's' : '');
                 
                 // Renderizar y mostrar panel automáticamente
-                Render.alertsPanel();
-                
-                // Mostrar panel automáticamente si hay alertas
-                const panel = document.getElementById('alertsPanel');
-                panel.classList.add('visible');
-                arrow.textContent = 'Ocultar ▼';
-            } else {
-                bar.classList.remove('visible');
-                const panel = document.getElementById('alertsPanel');
-                panel.classList.remove('visible');
-                panel.innerHTML = '';
-                arrow.textContent = 'Ver ›';
-            }
-        }
-    };
+                        Render.alertsPanel();
+    },
 
-        alertsPanel: () => {
-            const panel = document.getElementById('alertsPanel');
-            if (state.alerts.length === 0) {
-                panel.innerHTML = '';
-                panel.classList.remove('visible');
-                return;
-            }
+    alertsPanel: () => {
+        const panel = document.getElementById('alertsPanel');
+        if (!panel) return;
             
-            const html = state.alerts.map(alert => {
-                let icon = '⚠️';
-                let className = '';
-                let action = '';
-                
-                if (alert.type === 'duplicate') {
-                    icon = '🔴';
-                    className = 'duplicado';
-                    action = `<button class="alert-item-action" onclick="App.actions.resolverDuplicado('${alert.codigo}')">Resolver</button>`;
-                } else if (alert.type === 'sin-codigo') {
-                    icon = '🟡';
-                    className = 'sin-codigo';
-                    action = `<button class="alert-item-action" onclick="App.ui.promptAddCode('${alert.asesorId}')">Agregar</button>`;
-                } else if (alert.type === 'inasist-codigo') {
-                    icon = '🟠';
-                    className = 'inasist-codigo';
-                    action = `<button class="alert-item-action" onclick="App.actions.liberarCodigos('${alert.asesorId}')">Liberar</button>`;
-                }
-                
-                return `
-                    <div class="alert-item ${className}">
-                        <span class="alert-item-icon">${icon}</span>
-                        <span class="alert-item-text">${Utils.escapeHtml(alert.msg)}</span>
-                        ${action}
-                    </div>
-                `;
-            }).join('');
-            
-            panel.innerHTML = html;
+        if (state.alerts.length === 0) {
+            panel.innerHTML = '';
+            panel.classList.remove('visible');
+            const arrow = document.getElementById('alertArrow');
+            if (arrow) arrow.textContent = 'Ver ›';
+            return;
         }
+            
+        const html = state.alerts.map(alert => {
+            let icon = '⚠️';
+            let className = '';
+            let action = '';
+                
+            if (alert.type === 'duplicate') {
+                icon = '🔴';
+                className = 'duplicado';
+                action = `<button class="alert-item-action" onclick="App.actions.resolverDuplicado('${Utils.escapeHtml(alert.codigo)}')">Resolver</button>`;
+            } else if (alert.type === 'sin-codigo') {
+                icon = '🟡';
+                className = 'sin-codigo';
+                action = `<button class="alert-item-action" onclick="App.ui.promptAddCode('${alert.asesorId}')">Agregar</button>`;
+            } else if (alert.type === 'inasist-codigo') {
+                icon = '🟠';
+                className = 'inasist-codigo';
+                action = `<button class="alert-item-action" onclick="App.actions.liberarCodigos('${alert.asesorId}')">Liberar</button>`;
+            }
+                
+            return `
+                <div class="alert-item ${className}">
+                    <span class="alert-item-icon">${icon}</span>
+                    <span class="alert-item-text">${Utils.escapeHtml(alert.msg)}</span>
+                    ${action}
+                </div>
+            `;
+        }).join('');
+            
+        panel.innerHTML = html;
+    }
+};
+
+// ===================== INTERFAZ =====================
 
     // ===================== INTERFAZ =====================
     const UI = {
