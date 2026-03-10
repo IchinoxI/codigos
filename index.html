@@ -1109,10 +1109,29 @@ const App = (function() {
         },
         loadState: () => {
             try {
-                const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-                if (data && data.asesores) { Object.assign(state, data); return true; }
-            } catch (e) {}
-            return false;
+                const stored = localStorage.getItem(STORAGE_KEY);
+                console.log('Intentando cargar desde localStorage...', stored ? 'Datos encontrados' : 'Sin datos');
+                
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    console.log('Datos parseados:', {
+                        asesores: data.asesores?.length || 0,
+                        codigos: data.codigos?.length || 0,
+                        version: data.version
+                    });
+                    
+                    if (data && data.asesores) {
+                        Object.assign(state, data);
+                        console.log('Estado cargado exitosamente');
+                        return true;
+                    }
+                }
+                console.log('No hay datos válidos en localStorage');
+                return false;
+            } catch (e) {
+                console.error('Error cargando estado:', e);
+                return false;
+            }
         },
         saveQueue: () => {
             try { localStorage.setItem(QUEUE_KEY, JSON.stringify(operationQueue)); } catch (e) {}
@@ -1265,10 +1284,14 @@ const App = (function() {
         },
         
         forceSync: async () => {
-            if (state.isSyncing) return;
+            if (state.isSyncing) {
+                console.log('Ya hay sincronización en curso');
+                return;
+            }
             
             if (pendingOps.mover || Object.keys(pendingOps.eliminar).length > 0 || 
                 Object.keys(pendingOps.crear).length > 0 || Object.keys(pendingOps.actualizar).length > 0) {
+                console.log('Hay operaciones pendientes, esperando...');
                 UI.setSyncStatus('syncing', 'Guardando cambios...');
                 setTimeout(() => Sync.forceSync(), 2000);
                 return;
@@ -1276,9 +1299,12 @@ const App = (function() {
             
             state.isSyncing = true;
             UI.setSyncStatus('syncing', 'Sincronizando...');
+            console.log('Iniciando sincronización con servidor...');
             
             try {
                 const data = await API.getData();
+                console.log('Datos recibidos del servidor:', data);
+                
                 if (data) {
                     let asesoresFiltrados = data.asesores || [];
                     let codigosFiltrados = data.codigos || [];
@@ -1307,17 +1333,21 @@ const App = (function() {
                     state.version = data.version || Date.now();
                     state.lastSync = new Date().toISOString();
                     state.isOnline = true;
+                    
                     Storage.saveState();
                     Render.all();
+                    
                     UI.setSyncStatus('synced', 'Sincronizado ✓');
+                    console.log('Sincronización exitosa');
                     
                     if (operationQueue.length > 0) {
                         setTimeout(() => Sync.processQueue(), 500);
                     }
                 }
             } catch (error) {
-                console.error('Error forceSync:', error);
+                console.error('Error en forceSync:', error);
                 state.isOnline = false;
+                
                 if (state.asesores.length > 0) {
                     UI.setSyncStatus('offline', 'Modo local');
                     Render.all();
@@ -1549,13 +1579,19 @@ const App = (function() {
     // ===================== RENDERIZADO =====================
     const Render = {
         all: () => {
-            Render.config();
-            Render.stats();
-            Render.detectAlerts();
-            Render.inasistencias();
-            Render.lideres();
-            Render.asesores();
-            Render.historial();
+            try {
+                console.log('Renderizando todo...');
+                Render.config();
+                Render.stats();
+                Render.detectAlerts();
+                Render.inasistencias();
+                Render.lideres();
+                Render.asesores();
+                Render.historial();
+                console.log('Renderizado completo');
+            } catch (error) {
+                console.error('Error en Render.all():', error);
+            }
         },
         config: () => {
             document.getElementById('teamName').textContent = state.config.Equipo || 'Equipo';
@@ -2612,18 +2648,22 @@ const App = (function() {
 
     // ===================== INICIALIZACIÓN =====================
     const init = () => {
-        Storage.loadState();
+        // Cargar estado y cola desde localStorage
+        const cargado = Storage.loadState();
         Storage.loadQueue();
 
-        // Mostrar datos locales primero si existen
-        if (state.asesores.length > 0) {
+        // SIEMPRE mostrar datos locales primero
+        if (cargado && state.asesores.length > 0) {
+            console.log('Cargando datos locales:', state.asesores.length, 'asesores');
             Render.all();
-            UI.setSyncStatus('syncing', 'Conectando...');
+            UI.showLoading(false);
+            UI.setSyncStatus('synced', 'Datos locales');
         } else {
+            console.log('No hay datos locales');
             UI.showLoading(true);
-            UI.setSyncStatus('syncing', 'Cargando datos...');
         }
 
+        // Event listeners
         document.getElementById('searchInput').addEventListener('input', Utils.debounce(Render.asesores, 150));
 
         document.addEventListener('click', (e) => {
@@ -2644,7 +2684,7 @@ const App = (function() {
             state.isOnline = true;
             document.getElementById('offlineBanner').classList.remove('visible');
             UI.toast('Conexión restaurada', 'success');
-            Sync.forceSync();
+            setTimeout(() => Sync.forceSync(), 500);
         });
 
         window.addEventListener('offline', () => {
@@ -2655,14 +2695,20 @@ const App = (function() {
 
         Sync.updateQueueIndicator();
 
-        // Sincronizar inmediatamente
+        // Sincronizar en segundo plano después de 2 segundos
         if (state.isOnline) {
-            Sync.forceSync().finally(() => {
-                UI.showLoading(false);
-            });
+            setTimeout(() => {
+                console.log('Iniciando sincronización...');
+                Sync.forceSync().then(() => {
+                    console.log('Sincronización completada');
+                }).catch(err => {
+                    console.error('Error en sincronización:', err);
+                }).finally(() => {
+                    UI.showLoading(false);
+                });
+            }, 2000);
         } else {
             UI.showLoading(false);
-            UI.setSyncStatus('offline', 'Sin conexión');
         }
     };
 
