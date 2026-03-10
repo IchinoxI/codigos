@@ -181,6 +181,70 @@
 
         .alert-bar.visible { display: flex; }
 
+        /* ===== PANEL DE ALERTAS DETALLADO ===== */
+        .alerts-panel {
+            background: white;
+            border-bottom: 2px solid #fcd34d;
+            padding: 8px 12px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .alerts-panel.visible { display: flex; }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border-left: 3px solid;
+        }
+
+        .alert-item.duplicado {
+            background: #fee2e2;
+            border-left-color: #dc2626;
+            color: #7f1d1d;
+        }
+
+        .alert-item.sin-codigo {
+            background: #fef3c7;
+            border-left-color: #fbbf24;
+            color: #78350f;
+        }
+
+        .alert-item.inasist-codigo {
+            background: #ffedd5;
+            border-left-color: #f59e0b;
+            color: #7c2d12;
+        }
+
+        .alert-item-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .alert-item-text {
+            flex: 1;
+        }
+
+        .alert-item-action {
+            background: rgba(0,0,0,0.1);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.6875rem;
+            cursor: pointer;
+            color: inherit;
+            font-weight: 600;
+        }
+
+        .alert-item-action:active {
+            background: rgba(0,0,0,0.2);
+        }
+
         /* ===== QUEUE INDICATOR ===== */
         .queue-indicator {
             background: #dbeafe;
@@ -271,23 +335,36 @@
         .asesor-row {
             display: flex;
             align-items: center;
-            padding: 3px 6px;
+            padding: 2px 4px;
             margin-bottom: 1px;
             background: #f8fafc;
             border-radius: 3px;
             border-left: 3px solid var(--success);
-            gap: 4px;
-            min-height: 26px;
+            gap: 3px;
+            min-height: 22px;
             position: relative;
             cursor: move;
+            font-size: 0.7rem;
         }
 
         .asesor-row:last-child { margin-bottom: 0; }
         .asesor-row.inasistente { border-left-color: var(--danger); background: #fef2f2; }
-        .asesor-row.sin-codigo { border-left-color: var(--warning); background: #fffbeb; }
+        .asesor-row.sin-codigo { border-left-color: #fbbf24; background: #fef3c7; box-shadow: inset 0 0 0 1px #fbbf24; }
         .asesor-row.lider { border-left-color: var(--primary); background: #eff6ff; }
+        .asesor-row.duplicado { border-left-color: #dc2626; background: #fee2e2; box-shadow: inset 0 0 0 1px #dc2626; animation: alertPulse 2s infinite; }
+        .asesor-row.inasistente-con-codigo { border-left-color: #f59e0b; background: #ffedd5; box-shadow: inset 0 0 0 1px #f59e0b; }
         .asesor-row.dragging { opacity: 0.4; background: #e0e7ff; }
         .asesor-row.drag-over { border-top: 3px solid var(--primary); margin-top: -2px; }
+
+        @keyframes alertPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        .alert-icon {
+            font-size: 0.75rem;
+            margin-right: 2px;
+        }
 
         /* Estilos para drop en secciones */
         .section-body.drag-target {
@@ -718,6 +795,82 @@
             font-size: 0.8125rem;
         }
 
+        /* ===== MODAL DE CONFIRMACIÓN ===== */
+        .confirm-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .confirm-modal.visible { display: flex; }
+
+        .confirm-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 320px;
+            width: calc(100% - 40px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .confirm-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .confirm-message {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .confirm-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .confirm-btn.danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .confirm-btn.secondary {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        .confirm-btn:active {
+            transform: scale(0.98);
+        }
+
+        .empty-icon { font-size: 1.5rem; margin-bottom: 4px; }
+
+        /* Overlay para cerrar menús */
+        .menu-overlay {
+
         .empty-icon { font-size: 1.5rem; margin-bottom: 4px; }
 
         /* Overlay para cerrar menús */
@@ -750,6 +903,18 @@
     <!-- Menu Overlay -->
     <div class="menu-overlay" id="menuOverlay" onclick="App.ui.closeAllMenus()"></div>
 
+    <!-- Modal de Confirmación -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-title" id="confirmTitle">Confirmar acción</div>
+            <div class="confirm-message" id="confirmMessage"></div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn secondary" id="confirmCancel">Cancelar</button>
+                <button class="confirm-btn primary" id="confirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-row">
@@ -758,6 +923,7 @@
                 <div class="header-date" id="teamDate"></div>
             </div>
             <div class="header-actions">
+                <button class="h-btn" id="undoBtn" onclick="App.actions.undo()" title="Deshacer" style="display:none;">↶</button>
                 <button class="h-btn" onclick="App.sync.forceSync()" title="Sincronizar">🔄</button>
             </div>
         </div>
@@ -788,11 +954,14 @@
     </div>
 
     <!-- Alertas -->
-    <div class="alert-bar" id="alertBar" onclick="App.ui.showAlerts()">
+    <div class="alert-bar" id="alertBar" onclick="App.ui.toggleAlertsPanel()">
         <span>⚠️</span>
         <span id="alertText">0 alertas</span>
-        <span style="margin-left:auto;">Ver ›</span>
+        <span style="margin-left:auto;" id="alertArrow">Ver ›</span>
     </div>
+
+    <!-- Panel de Alertas Detallado -->
+    <div class="alerts-panel" id="alertsPanel"></div>
 
     <!-- Cola -->
     <div class="queue-indicator" id="queueIndicator">
@@ -886,7 +1055,8 @@ const App = (function() {
         version: 0,
         isOnline: navigator.onLine,
         isSyncing: false,
-        lastSync: null
+        lastSync: null,
+        undoStack: []
     };
 
     let operationQueue = [];
@@ -1278,6 +1448,17 @@ const App = (function() {
         },
         
         addCodigo: (asesorId, codigo, pass) => {
+            // Validar duplicados
+            const codigoNorm = codigo.toLowerCase().trim();
+            const duplicado = state.codigos.find(c => c.Codigo.toLowerCase().trim() === codigoNorm);
+            
+            if (duplicado) {
+                const asesor = state.asesores.find(a => a.ID === duplicado.AsesorID);
+                const nombreDup = asesor ? asesor.Nombre : 'otro asesor';
+                UI.toast(`⚠️ El código "${codigo}" ya está asignado a ${nombreDup}`, 'error');
+                return null;
+            }
+            
             const c = {
                 ID: Utils.genId(),
                 Codigo: codigo,
@@ -1432,16 +1613,43 @@ const App = (function() {
         },
         asesorRow: (a, section) => {
             const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-            const statusMap = {
-                'inasistente': { emoji: '❌', class: 'inasistente' },
-                'sin-codigo': { emoji: '⚠️', class: 'sin-codigo' },
-                'asistente': { emoji: '✅', class: '' }
-            };
-            const status = statusMap[a.Estado] || statusMap['asistente'];
-            const rowClass = section === 'lider' ? 'lider' : status.class;
-
+            
+            // Determinar clases y estado visual
+            let rowClass = section === 'lider' ? 'lider' : '';
+            let statusEmoji = '✅';
+            let alertIcon = '';
+            
+            // Detectar si tiene códigos duplicados
             const dupIds = [];
-            state.alerts.forEach(alert => { if (alert.ids) dupIds.push(...alert.ids); });
+            state.alerts.forEach(alert => { 
+                if (alert.type === 'duplicate' && alert.codigoIds) {
+                    dupIds.push(...alert.codigoIds);
+                }
+            });
+            
+            const tieneDuplicado = codes.some(c => dupIds.includes(c.ID));
+            
+            // Determinar estado
+            if (a.Estado === 'inasistente') {
+                statusEmoji = '🔴';
+                rowClass = 'inasistente';
+                if (codes.length > 0) {
+                    rowClass = 'inasistente-con-codigo';
+                    alertIcon = '<span class="alert-icon" title="Tiene códigos asignados">⚠️</span>';
+                }
+            } else if (tieneDuplicado) {
+                statusEmoji = '⚠️';
+                rowClass = 'duplicado';
+                alertIcon = '<span class="alert-icon" title="Código duplicado">⚠️</span>';
+            } else if (codes.length === 0) {
+                statusEmoji = '🟡';
+                rowClass = 'sin-codigo';
+                alertIcon = '<span class="alert-icon" title="Sin código">!</span>';
+            } else if (section === 'lider') {
+                statusEmoji = '🟢';
+            } else {
+                statusEmoji = '🟢';
+            }
 
             let codesHtml;
             if (codes.length === 0) {
@@ -1496,25 +1704,65 @@ const App = (function() {
         },
         detectAlerts: () => {
             state.alerts = [];
+            
+            // Detectar códigos duplicados
             const conteo = {};
             state.codigos.forEach(c => {
+                if (!c.Codigo || c.Codigo.trim() === '') return;
                 const key = c.Codigo.toLowerCase().trim();
                 if (!conteo[key]) conteo[key] = [];
                 conteo[key].push(c);
             });
+            
             Object.entries(conteo).forEach(([key, items]) => {
                 if (items.length > 1) {
                     const nombres = items.map(c => {
                         const a = state.asesores.find(x => x.ID === c.AsesorID);
-                        return a ? a.Nombre : '?';
+                        return a ? a.Nombre : 'Sin asignar';
                     });
                     state.alerts.push({
                         type: 'duplicate',
                         msg: `"${items[0].Codigo}" duplicado en: ${nombres.join(', ')}`,
-                        ids: items.map(c => c.ID)
+                        ids: items.map(c => c.ID),
+                        codigoIds: items.map(c => c.ID),
+                        codigo: items[0].Codigo
                     });
                 }
             });
+            
+            // Detectar asesores sin código (solo asistentes)
+            state.asesores.forEach(a => {
+                if (a.Estado !== 'inasistente') {
+                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
+                    if (codes.length === 0) {
+                        state.alerts.push({
+                            type: 'sin-codigo',
+                            msg: `${a.Nombre} no tiene código asignado`,
+                            asesorId: a.ID,
+                            asesorNombre: a.Nombre
+                        });
+                    }
+                }
+            });
+            
+            // Detectar inasistentes con código
+            state.asesores.forEach(a => {
+                if (a.Estado === 'inasistente') {
+                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
+                    if (codes.length > 0) {
+                        state.alerts.push({
+                            type: 'inasist-codigo',
+                            msg: `${a.Nombre} está inasistente pero tiene ${codes.length} código(s)`,
+                            asesorId: a.ID,
+                            asesorNombre: a.Nombre,
+                            codigoIds: codes.map(c => c.ID),
+                            codigos: codes.map(c => c.Codigo)
+                        });
+                    }
+                }
+            });
+            
+            // Actualizar barra de alertas
             const bar = document.getElementById('alertBar');
             const txt = document.getElementById('alertText');
             if (state.alerts.length > 0) {
@@ -1522,9 +1770,51 @@ const App = (function() {
                 txt.textContent = state.alerts.length + ' alerta' + (state.alerts.length > 1 ? 's' : '');
             } else {
                 bar.classList.remove('visible');
+                document.getElementById('alertsPanel').classList.remove('visible');
             }
+            
+            Render.alertsPanel();
         }
     };
+
+        alertsPanel: () => {
+            const panel = document.getElementById('alertsPanel');
+            if (state.alerts.length === 0) {
+                panel.innerHTML = '';
+                panel.classList.remove('visible');
+                return;
+            }
+            
+            const html = state.alerts.map(alert => {
+                let icon = '⚠️';
+                let className = '';
+                let action = '';
+                
+                if (alert.type === 'duplicate') {
+                    icon = '🔴';
+                    className = 'duplicado';
+                    action = `<button class="alert-item-action" onclick="App.actions.resolverDuplicado('${alert.codigo}')">Resolver</button>`;
+                } else if (alert.type === 'sin-codigo') {
+                    icon = '🟡';
+                    className = 'sin-codigo';
+                    action = `<button class="alert-item-action" onclick="App.ui.promptAddCode('${alert.asesorId}')">Agregar</button>`;
+                } else if (alert.type === 'inasist-codigo') {
+                    icon = '🟠';
+                    className = 'inasist-codigo';
+                    action = `<button class="alert-item-action" onclick="App.actions.liberarCodigos('${alert.asesorId}')">Liberar</button>`;
+                }
+                
+                return `
+                    <div class="alert-item ${className}">
+                        <span class="alert-item-icon">${icon}</span>
+                        <span class="alert-item-text">${Utils.escapeHtml(alert.msg)}</span>
+                        ${action}
+                    </div>
+                `;
+            }).join('');
+            
+            panel.innerHTML = html;
+        }
 
     // ===================== INTERFAZ =====================
     const UI = {
@@ -1594,9 +1884,9 @@ const App = (function() {
             const codigo = state.codigos.find(c => c.ID === codigoId);
             if (!codigo) return;
 
-            const otros = state.asesores.filter(a => a.ID !== asesorId);
+            const otros = state.asesores.filter(a => a.ID !== asesorId && a.Estado !== 'inasistente');
             const transferHtml = otros.slice(0, 10).map(a => {
-                const icon = a.Estado === 'inasistente' ? '❌' : '✅';
+                const icon = a.Rol === 'lider' ? '👑' : '✅';
                 return `<div class="context-menu-item" onclick="App.actions.transferCode('${codigoId}','${a.ID}')">${icon} ${Utils.escapeHtml(a.Nombre)}</div>`;
             }).join('');
 
@@ -1605,6 +1895,7 @@ const App = (function() {
                 <input class="context-menu-input" type="text" value="${Utils.escapeHtml(codigo.Contrasena || '')}" placeholder="Clave" onchange="App.actions.updateCodePass('${codigoId}',this.value)">
                 <div class="context-menu-header">Transferir a</div>
                 ${transferHtml || '<div class="context-menu-item" style="color:var(--text-muted)">No hay otros asesores</div>'}
+                <div class="context-menu-item" style="color:var(--danger);border-top:1px solid var(--border);" onclick="App.actions.deleteCode('${codigoId}')">🗑️ Eliminar código</div>
             `;
             UI.showContextMenu(html, event.clientX, event.clientY);
         },
@@ -1668,10 +1959,12 @@ const App = (function() {
         promptAddCode: (asesorId) => {
             UI.closeAllMenus();
             const codigo = prompt('Código:');
-            if (codigo) {
+            if (codigo && codigo.trim()) {
                 const clave = prompt('Clave (opcional):');
-                CRUD.addCodigo(asesorId, codigo.trim(), clave ? clave.trim() : '');
-                UI.toast('Código agregado', 'success');
+                const resultado = CRUD.addCodigo(asesorId, codigo.trim(), clave ? clave.trim() : '');
+                if (resultado) {
+                    UI.toast('Código agregado', 'success');
+                }
             }
         },
 
@@ -1690,14 +1983,58 @@ const App = (function() {
             document.getElementById('addClave').value = '';
         },
 
-        showAlerts: () => {
-            if (state.alerts.length === 0) {
-                UI.toast('Sin alertas', 'success');
-                return;
+        toggleAlertsPanel: () => {
+            const panel = document.getElementById('alertsPanel');
+            const arrow = document.getElementById('alertArrow');
+            
+            if (panel.classList.contains('visible')) {
+                panel.classList.remove('visible');
+                arrow.textContent = 'Ver ›';
+            } else {
+                panel.classList.add('visible');
+                arrow.textContent = 'Ocultar ▼';
             }
-            let msg = 'ALERTAS:\n\n';
-            state.alerts.forEach(a => { msg += '⚠️ ' + a.msg + '\n'; });
-            alert(msg);
+        },
+
+        showConfirm: (title, message, onConfirm, danger = false) => {
+            const modal = document.getElementById('confirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            const okBtn = document.getElementById('confirmOk');
+            const cancelBtn = document.getElementById('confirmCancel');
+            
+            titleEl.textContent = title;
+            messageEl.innerHTML = message;
+            
+            okBtn.className = 'confirm-btn ' + (danger ? 'danger' : 'primary');
+            
+            const hide = () => {
+                modal.classList.remove('visible');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+            
+            okBtn.onclick = () => {
+                hide();
+                if (onConfirm) onConfirm();
+            };
+            
+            cancelBtn.onclick = hide;
+            
+            modal.classList.add('visible');
+        },
+
+        showAlerts: () => {
+            UI.toggleAlertsPanel();
+        },
+
+        updateUndoButton: () => {
+            const btn = document.getElementById('undoBtn');
+            if (state.undoStack && state.undoStack.length > 0) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
         }
     };
 
@@ -1710,15 +2047,63 @@ const App = (function() {
         },
 
         transferCode: (codigoId, toId) => {
-            CRUD.transferCodigo(codigoId, toId);
-            UI.closeAllMenus();
-            UI.toast('Código transferido', 'success');
+            const codigo = state.codigos.find(c => c.ID === codigoId);
+            const asesorOrigen = state.asesores.find(a => a.ID === codigo.AsesorID);
+            const asesorDestino = state.asesores.find(a => a.ID === toId);
+            
+            if (!codigo || !asesorDestino) return;
+            
+            const nombreOrigen = asesorOrigen ? asesorOrigen.Nombre : 'Sin asignar';
+            const nombreDestino = asesorDestino.Nombre;
+            
+            UI.showConfirm(
+                'Transferir código',
+                `El código <strong>${Utils.escapeHtml(codigo.Codigo)}</strong> pasará de <strong>${Utils.escapeHtml(nombreOrigen)}</strong> a <strong>${Utils.escapeHtml(nombreDestino)}</strong>.<br><br>¿Confirmar?`,
+                () => {
+                    // Guardar para deshacer
+                    state.undoStack.push({
+                        type: 'transfer',
+                        codigoId: codigoId,
+                        fromId: codigo.AsesorID,
+                        toId: toId,
+                        timestamp: Date.now()
+                    });
+                    if (state.undoStack.length > 10) state.undoStack.shift();
+                    
+                    CRUD.transferCodigo(codigoId, toId);
+                    UI.closeAllMenus();
+                    UI.toast('Código transferido', 'success');
+                    UI.updateUndoButton();
+                }
+            );
         },
 
         updateCodePass: (codigoId, pass) => {
             CRUD.updateCodigo(codigoId, { Contrasena: pass });
             UI.closeAllMenus();
             UI.toast('Clave actualizada', 'success');
+        },
+
+        deleteCode: (codigoId) => {
+            const codigo = state.codigos.find(c => c.ID === codigoId);
+            if (!codigo) return;
+            
+            UI.showConfirm(
+                'Eliminar código',
+                `¿Eliminar el código <strong>${Utils.escapeHtml(codigo.Codigo)}</strong>?<br><br>Esta acción no se puede deshacer.`,
+                () => {
+                    const idx = state.codigos.findIndex(c => c.ID === codigoId);
+                    if (idx !== -1) {
+                        state.codigos.splice(idx, 1);
+                        Storage.saveState();
+                        Sync.enqueue('deleteCodigo', { ID: codigoId });
+                        Render.all();
+                        UI.toast('Código eliminado', 'success');
+                    }
+                },
+                true
+            );
+            UI.closeAllMenus();
         },
 
         moveToLider: (asesorId) => {
@@ -1853,6 +2238,61 @@ const App = (function() {
             document.body.removeChild(ta);
         },
 
+        resolverDuplicado: (codigo) => {
+            UI.closeAllMenus();
+            const codigoNorm = codigo.toLowerCase().trim();
+            const duplicados = state.codigos.filter(c => c.Codigo.toLowerCase().trim() === codigoNorm);
+            
+            if (duplicados.length < 2) {
+                UI.toast('No hay duplicados', 'info');
+                return;
+            }
+            
+            let msg = `Se encontraron ${duplicados.length} instancias del código "${codigo}":\n\n`;
+            duplicados.forEach((c, idx) => {
+                const asesor = state.asesores.find(a => a.ID === c.AsesorID);
+                msg += `${idx + 1}. ${asesor ? asesor.Nombre : 'Sin asignar'}\n`;
+            });
+            msg += '\nElimina manualmente los códigos duplicados haciendo clic en cada código.';
+            
+            alert(msg);
+        },
+
+        liberarCodigos: (asesorId) => {
+            const asesor = state.asesores.find(a => a.ID === asesorId);
+            if (!asesor) return;
+            
+            const codes = state.codigos.filter(c => c.AsesorID === asesorId);
+            if (codes.length === 0) return;
+            
+            UI.showConfirm(
+                'Liberar códigos',
+                `¿Desasignar ${codes.length} código(s) de <strong>${Utils.escapeHtml(asesor.Nombre)}</strong>?<br><br>Los códigos quedarán sin asignar.`,
+                () => {
+                    codes.forEach(c => {
+                        CRUD.updateCodigo(c.ID, { AsesorID: '' });
+                    });
+                    UI.toast(`${codes.length} código(s) liberado(s)`, 'success');
+                }
+            );
+        },
+
+        undo: () => {
+            if (!state.undoStack || state.undoStack.length === 0) {
+                UI.toast('No hay cambios para deshacer', 'info');
+                return;
+            }
+            
+            const lastAction = state.undoStack.pop();
+            
+            if (lastAction.type === 'transfer') {
+                CRUD.updateCodigo(lastAction.codigoId, { AsesorID: lastAction.fromId });
+                UI.toast('Transferencia deshecha', 'success');
+            }
+            
+            UI.updateUndoButton();
+        },
+
         exportBackup: () => {
             const data = {
                 asesores: state.asesores,
@@ -1873,18 +2313,14 @@ const App = (function() {
         }
     };
 
-    // ===================== DRAG & DROP ENTRE SECCIONES (MOUSE + TOUCH) =====================
+    // ===================== DRAG & DROP ENTRE SECCIONES =====================
     let draggedElement = null;
     let draggedId = null;
     let draggedSection = null;
     let canDrag = false;
-    let touchClone = null;
-    let touchStartY = 0;
-    let touchStartX = 0;
-    let isTouchDragging = false;
 
     const setupDragDrop = () => {
-        // ========== EVENTOS MOUSE (PC) ==========
+        // Detectar si el click fue en el handle
         document.addEventListener('mousedown', (e) => {
             const handle = e.target.closest('.drag-handle');
             if (handle) {
@@ -1903,36 +2339,74 @@ const App = (function() {
             });
         });
 
+        // INICIO DEL ARRASTRE
         document.addEventListener('dragstart', (e) => {
             const row = e.target.closest('.asesor-row');
+            
             if (!row || !canDrag) {
                 e.preventDefault();
                 return;
             }
+            
             draggedElement = row;
             draggedId = row.dataset.id;
             draggedSection = row.dataset.section;
+            
             row.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', draggedId);
-            setTimeout(() => { mostrarZonasDestino(); }, 10);
+            
+            setTimeout(() => {
+                document.querySelectorAll('.section-body').forEach(sb => {
+                    const section = sb.closest('.section');
+                    if (section) {
+                        if (section.id === 'secInasist') {
+                            sb.classList.add('drag-target-inasist');
+                        } else if (section.id === 'secLideres') {
+                            sb.classList.add('drag-target-lider');
+                        } else {
+                            sb.classList.add('drag-target');
+                        }
+                    }
+                });
+            }, 10);
         });
 
+        // FIN DEL ARRASTRE
         document.addEventListener('dragend', () => {
-            finalizarArrastre();
+            canDrag = false;
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement.setAttribute('draggable', 'false');
+            }
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
+                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
+            });
+            document.querySelectorAll('.asesor-row').forEach(row => {
+                row.setAttribute('draggable', 'false');
+            });
+            draggedElement = null;
+            draggedId = null;
+            draggedSection = null;
         });
 
+        // MIENTRAS SE ARRASTRA
         document.addEventListener('dragover', (e) => {
             if (!draggedId) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
+            
             const row = e.target.closest('.asesor-row');
+            
             document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            
             if (row && row.dataset.id !== draggedId) {
                 row.classList.add('drag-over');
             }
         });
 
+        // SALIR DEL ÁREA
         document.addEventListener('dragleave', (e) => {
             const row = e.target.closest('.asesor-row');
             if (row && !row.contains(e.relatedTarget)) {
@@ -1940,195 +2414,39 @@ const App = (function() {
             }
         });
 
+        // SOLTAR
         document.addEventListener('drop', (e) => {
             e.preventDefault();
-            procesarDrop(e.target);
-        });
-
-        // ========== EVENTOS TOUCH (MÓVIL) ==========
-        document.addEventListener('touchstart', (e) => {
-            const handle = e.target.closest('.drag-handle');
-            if (!handle) return;
             
-            const row = handle.closest('.asesor-row');
-            if (!row) return;
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
+                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
+            });
             
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-            
-            draggedElement = row;
-            draggedId = row.dataset.id;
-            draggedSection = row.dataset.section;
-            
-            // Esperar un momento para confirmar que es un arrastre
-            setTimeout(() => {
-                if (draggedId && !isTouchDragging) {
-                    iniciarArrastreTactil(row, touch);
-                }
-            }, 150);
-        }, { passive: false });
-
-        document.addEventListener('touchmove', (e) => {
             if (!draggedId) return;
             
-            const touch = e.touches[0];
-            const deltaX = Math.abs(touch.clientX - touchStartX);
-            const deltaY = Math.abs(touch.clientY - touchStartY);
+            const targetRow = e.target.closest('.asesor-row');
+            const sectionBody = e.target.closest('.section-body');
             
-            // Si se movió suficiente, es un arrastre
-            if (!isTouchDragging && (deltaX > 10 || deltaY > 10)) {
-                iniciarArrastreTactil(draggedElement, touch);
-            }
-            
-            if (isTouchDragging) {
-                e.preventDefault();
-                moverElementoTactil(touch);
-                detectarObjetivoTactil(touch);
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', (e) => {
-            if (!draggedId) return;
-            
-            if (isTouchDragging) {
-                const touch = e.changedTouches[0];
-                const elementoDebajo = document.elementFromPoint(touch.clientX, touch.clientY);
-                procesarDrop(elementoDebajo);
-            }
-            
-            finalizarArrastre();
-        });
-
-        document.addEventListener('touchcancel', () => {
-            finalizarArrastre();
-        });
-    };
-
-    const iniciarArrastreTactil = (row, touch) => {
-        isTouchDragging = true;
-        row.classList.add('dragging');
-        
-        // Crear clon visual que sigue el dedo
-        touchClone = row.cloneNode(true);
-        touchClone.style.cssText = `
-            position: fixed;
-            top: ${touch.clientY - 20}px;
-            left: ${touch.clientX - 50}px;
-            width: ${row.offsetWidth}px;
-            opacity: 0.8;
-            background: white;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 10000;
-            pointer-events: none;
-            border-radius: 6px;
-            transform: scale(1.02);
-        `;
-        document.body.appendChild(touchClone);
-        
-        mostrarZonasDestino();
-        
-        // Vibración táctil si está disponible
-        if (navigator.vibrate) {
-            navigator.vibrate(50);
-        }
-    };
-
-    const moverElementoTactil = (touch) => {
-        if (touchClone) {
-            touchClone.style.top = (touch.clientY - 20) + 'px';
-            touchClone.style.left = (touch.clientX - 50) + 'px';
-        }
-    };
-
-    const detectarObjetivoTactil = (touch) => {
-        // Ocultar temporalmente el clon para detectar qué hay debajo
-        if (touchClone) touchClone.style.display = 'none';
-        
-        const elementoDebajo = document.elementFromPoint(touch.clientX, touch.clientY);
-        
-        if (touchClone) touchClone.style.display = 'block';
-        
-        // Limpiar marcadores anteriores
-        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        
-        if (elementoDebajo) {
-            const row = elementoDebajo.closest('.asesor-row');
-            if (row && row.dataset.id !== draggedId) {
-                row.classList.add('drag-over');
-            }
-        }
-    };
-
-    const mostrarZonasDestino = () => {
-        document.querySelectorAll('.section-body').forEach(sb => {
-            const section = sb.closest('.section');
-            if (section) {
-                if (section.id === 'secInasist') {
-                    sb.classList.add('drag-target-inasist');
-                } else if (section.id === 'secLideres') {
-                    sb.classList.add('drag-target-lider');
-                } else {
-                    sb.classList.add('drag-target');
+            if (targetRow && targetRow.dataset.id !== draggedId) {
+                // Soltar sobre otra fila
+                const targetId = targetRow.dataset.id;
+                const targetSection = targetRow.dataset.section;
+                handleMove(draggedId, targetId, draggedSection, targetSection);
+            } else if (sectionBody && !targetRow) {
+                // Soltar en área vacía de una sección
+                const section = sectionBody.closest('.section');
+                if (section) {
+                    let targetSection = 'asesor';
+                    if (section.id === 'secInasist') targetSection = 'inasist';
+                    else if (section.id === 'secLideres') targetSection = 'lider';
+                    
+                    if (draggedSection !== targetSection) {
+                        handleDropOnSection(draggedId, draggedSection, targetSection);
+                    }
                 }
             }
         });
-    };
-
-    const finalizarArrastre = () => {
-        canDrag = false;
-        isTouchDragging = false;
-        
-        if (touchClone) {
-            touchClone.remove();
-            touchClone = null;
-        }
-        
-        if (draggedElement) {
-            draggedElement.classList.remove('dragging');
-            draggedElement.setAttribute('draggable', 'false');
-        }
-        
-        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
-            el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
-        });
-        document.querySelectorAll('.asesor-row').forEach(row => {
-            row.setAttribute('draggable', 'false');
-        });
-        
-        draggedElement = null;
-        draggedId = null;
-        draggedSection = null;
-    };
-
-    const procesarDrop = (elementoDestino) => {
-        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
-            el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
-        });
-        
-        if (!draggedId || !elementoDestino) return;
-        
-        const targetRow = elementoDestino.closest('.asesor-row');
-        const sectionBody = elementoDestino.closest('.section-body');
-        
-        if (targetRow && targetRow.dataset.id !== draggedId) {
-            const targetId = targetRow.dataset.id;
-            const targetSection = targetRow.dataset.section;
-            handleMove(draggedId, targetId, draggedSection, targetSection);
-        } else if (sectionBody) {
-            const section = sectionBody.closest('.section');
-            if (section) {
-                let targetSection = 'asesor';
-                if (section.id === 'secInasist') targetSection = 'inasist';
-                else if (section.id === 'secLideres') targetSection = 'lider';
-                
-                if (draggedSection !== targetSection) {
-                    handleDropOnSection(draggedId, draggedSection, targetSection);
-                }
-            }
-        }
     };
 
     const handleDropOnSection = (fromId, fromSection, toSection) => {
@@ -2137,6 +2455,7 @@ const App = (function() {
         
         pendingOps.mover = Date.now();
         
+        // Cambiar rol/estado según la sección destino
         if (toSection === 'lider') {
             fromAsesor.Rol = 'lider';
             fromAsesor.Estado = 'asistente';
@@ -2147,6 +2466,7 @@ const App = (function() {
             fromAsesor.Estado = 'asistente';
         }
         
+        // Calcular nueva posición al final de la sección
         let lista;
         if (toSection === 'lider') {
             lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente' && a.ID !== fromId);
@@ -2162,6 +2482,7 @@ const App = (function() {
         Storage.saveState();
         Render.all();
         
+        // Sincronizar con servidor
         Sync.enqueue('updateAsesor', {
             ID: fromId,
             Rol: fromAsesor.Rol,
@@ -2173,7 +2494,6 @@ const App = (function() {
             pendingOps.mover = false;
         }, GRACE_TIME);
         
-        if (navigator.vibrate) navigator.vibrate(30);
         UI.toast('Movido a ' + (toSection === 'lider' ? 'Líderes' : toSection === 'inasist' ? 'Inasistencias' : 'Asesores'), 'success');
     };
 
@@ -2187,6 +2507,7 @@ const App = (function() {
         
         const cambiaSeccion = fromSection !== toSection;
         
+        // Si cambia de sección, actualizar rol/estado
         if (cambiaSeccion) {
             if (toSection === 'lider') {
                 fromAsesor.Rol = 'lider';
@@ -2199,6 +2520,7 @@ const App = (function() {
             }
         }
         
+        // Obtener lista de la sección destino
         let lista;
         if (toSection === 'lider') {
             lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
@@ -2210,16 +2532,23 @@ const App = (function() {
         
         lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
         
+        // Remover el elemento arrastrado si está en la lista
         const fromIdx = lista.findIndex(a => a.ID === fromId);
-        if (fromIdx !== -1) lista.splice(fromIdx, 1);
+        if (fromIdx !== -1) {
+            lista.splice(fromIdx, 1);
+        }
         
+        // Encontrar posición del target
         const toIdx = lista.findIndex(a => a.ID === toId);
         if (toIdx === -1) {
+            // Si no encuentra el target, agregar al final
             lista.push(fromAsesor);
         } else {
+            // Insertar antes del target
             lista.splice(toIdx, 0, fromAsesor);
         }
         
+        // Reasignar posiciones
         const ordenNuevo = [];
         lista.forEach((asesor, index) => {
             const nuevaPos = index + 1;
@@ -2233,6 +2562,7 @@ const App = (function() {
         Storage.saveState();
         Render.all();
         
+        // Sincronizar
         if (cambiaSeccion) {
             Sync.enqueue('updateAsesor', {
                 ID: fromId,
@@ -2247,7 +2577,6 @@ const App = (function() {
             pendingOps.mover = false;
         }, GRACE_TIME);
         
-        if (navigator.vibrate) navigator.vibrate(30);
         UI.toast('Posición actualizada', 'success');
     };
 
