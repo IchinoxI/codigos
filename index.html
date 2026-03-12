@@ -1,2727 +1,1922 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestión de Códigos</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --primary-light: #3b82f6;
-            --success: #059669;
-            --success-light: #10b981;
-            --warning: #d97706;
-            --warning-light: #f59e0b;
-            --danger: #dc2626;
-            --danger-light: #ef4444;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --radius: 6px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.1);
-            --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html {
-            font-size: 16px;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 0.8125rem;
-            line-height: 1.3;
-            padding-bottom: 70px;
-            min-height: 100vh;
-            overscroll-behavior: none;
-        }
-
-        /* ===== HEADER COMPACTO ===== */
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 8px 12px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .header-title {
-            font-size: 1rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .header-date {
-            font-size: 0.75rem;
-            opacity: 0.9;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .h-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .h-btn:active {
-            background: rgba(255,255,255,0.35);
-            transform: scale(0.95);
-        }
-
-        .sync-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.625rem;
-            background: rgba(255,255,255,0.2);
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-top: 4px;
-        }
-
-        .sync-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #4ade80;
-        }
-
-        .sync-dot.syncing { background: #fbbf24; animation: pulse 1s infinite; }
-        .sync-dot.error { background: #f87171; }
-        .sync-dot.offline { background: #94a3b8; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        /* ===== STATS COMPACTOS ===== */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 4px 2px;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 2px;
-            border-right: 1px solid var(--border);
-        }
-
-        .stat:last-child { border-right: none; }
-
-        .stat-val {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .stat-lbl {
-            font-size: 0.5625rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        /* ===== ALERTAS ===== */
-        .alert-bar {
-            background: #fef3c7;
-            border-bottom: 1px solid #fcd34d;
-            padding: 6px 12px;
-            font-size: 0.75rem;
-            color: #92400e;
-            display: none;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-
-        .alert-bar.visible { display: flex; }
-
-        /* ===== PANEL DE ALERTAS DETALLADO ===== */
-        .alerts-panel {
-            background: white;
-            border-bottom: 2px solid #fcd34d;
-            padding: 8px 12px;
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .alerts-panel.visible { display: flex; }
-
-        .alert-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            border-left: 3px solid;
-        }
-
-        .alert-item.duplicado {
-            background: #fee2e2;
-            border-left-color: #dc2626;
-            color: #7f1d1d;
-        }
-
-        .alert-item.sin-codigo {
-            background: #fef3c7;
-            border-left-color: #fbbf24;
-            color: #78350f;
-        }
-
-        .alert-item.inasist-codigo {
-            background: #ffedd5;
-            border-left-color: #f59e0b;
-            color: #7c2d12;
-        }
-
-        .alert-item-icon {
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .alert-item-text {
-            flex: 1;
-        }
-
-        .alert-item-action {
-            background: rgba(0,0,0,0.1);
-            border: none;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 0.6875rem;
-            cursor: pointer;
-            color: inherit;
-            font-weight: 600;
-        }
-
-        .alert-item-action:active {
-            background: rgba(0,0,0,0.2);
-        }
-
-        /* ===== QUEUE INDICATOR ===== */
-        .queue-indicator {
-            background: #dbeafe;
-            border-bottom: 1px solid #93c5fd;
-            padding: 4px 12px;
-            font-size: 0.6875rem;
-            color: #1e40af;
-            display: none;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .queue-indicator.visible { display: flex; }
-
-        /* ===== BÚSQUEDA ===== */
-        .search-wrap {
-            padding: 6px 8px;
-            background: white;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 6px 10px 6px 30px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.8125rem;
-            background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 10px center;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-        }
-
-        /* ===== SECCIONES COMPACTAS ===== */
-        .section {
-            background: white;
-            margin: 4px 6px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .section-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            background: linear-gradient(to bottom, #fafafa, #f5f5f5);
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .section-head:active { background: #f0f0f0; }
-
-        .section-head h2 {
-            font-size: 0.8125rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .section-head .cnt {
-            background: var(--primary);
-            color: white;
-            padding: 1px 6px;
-            border-radius: 8px;
-            font-size: 0.6875rem;
-            font-weight: 600;
-        }
-
-        .section-head .arrow {
-            color: var(--text-muted);
-            font-size: 0.625rem;
-            transition: transform 0.2s;
-        }
-
-        .section.collapsed .section-body { display: none; }
-        .section.collapsed .arrow { transform: rotate(-90deg); }
-
-        .section-body { padding: 4px; }
-
-        /* ===== FILAS DE ASESORES ULTRA COMPACTAS ===== */
-        .asesor-row {
-            display: flex;
-            align-items: center;
-            padding: 2px 4px;
-            margin-bottom: 1px;
-            background: #f8fafc;
-            border-radius: 3px;
-            border-left: 3px solid var(--success);
-            gap: 3px;
-            min-height: 22px;
-            position: relative;
-            cursor: move;
-            font-size: 0.7rem;
-        }
-
-        .asesor-row:last-child { margin-bottom: 0; }
-        .asesor-row.inasistente { border-left-color: var(--danger); background: #fef2f2; }
-        .asesor-row.sin-codigo { border-left-color: #fbbf24; background: #fef3c7; box-shadow: inset 0 0 0 1px #fbbf24; }
-        .asesor-row.lider { border-left-color: var(--primary); background: #eff6ff; }
-        .asesor-row.duplicado { border-left-color: #dc2626; background: #fee2e2; box-shadow: inset 0 0 0 1px #dc2626; animation: alertPulse 2s infinite; }
-        .asesor-row.inasistente-con-codigo { border-left-color: #f59e0b; background: #ffedd5; box-shadow: inset 0 0 0 1px #f59e0b; }
-        .asesor-row.dragging { opacity: 0.4; background: #e0e7ff; }
-        .asesor-row.drag-over { border-top: 3px solid var(--primary); margin-top: -2px; }
-
-        @keyframes alertPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
-        }
-
-        .alert-icon {
-            font-size: 0.75rem;
-            margin-right: 2px;
-        }
-
-        /* Estilos para drop en secciones */
-        .section-body.drag-target {
-            background: #dbeafe;
-            border: 2px dashed var(--primary);
-            min-height: 50px;
-        }
-        .section-body.drag-target-inasist {
-            background: #fee2e2;
-            border: 2px dashed var(--danger);
-        }
-        .section-body.drag-target-lider {
-            background: #eff6ff;
-            border: 2px dashed var(--primary);
-        }
-
-        /* Drag Handle */
-        .drag-handle {
-            cursor: grab;
-            color: var(--text-light);
-            font-size: 0.875rem;
-            padding: 2px;
-            display: flex;
-            align-items: center;
-            user-select: none;
-        }
-
-        .drag-handle:active { cursor: grabbing; }
-
-        /* Status chip */
-        .status-chip {
-            font-size: 0.75rem;
-            cursor: pointer;
-            padding: 1px 2px;
-            border-radius: 3px;
-            position: relative;
-        }
-
-        .status-chip:hover { background: rgba(0,0,0,0.05); }
-
-        /* Nombre editable */
-        .asesor-name {
-            font-weight: 600;
-            font-size: 0.75rem;
-            color: var(--text);
-            cursor: pointer;
-            padding: 1px 4px;
-            border-radius: 3px;
-            border: 1px solid transparent;
-            min-width: 60px;
-        }
-
-        .asesor-name:hover { background: rgba(0,0,0,0.03); }
-
-        .asesor-name.editing {
-            border: 1px solid var(--primary);
-            background: white;
-            outline: none;
-        }
-
-        .asesor-main {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-wrap: nowrap;
-            overflow: hidden;
-        }
-
-        .badge {
-            font-size: 0.5rem;
-            padding: 0px 3px;
-            border-radius: 2px;
-            font-weight: 600;
-            text-transform: uppercase;
-            flex-shrink: 0;
-        }
-
-        .badge-ojt { background: #dbeafe; color: var(--primary); }
-
-        /* Códigos inline */
-        .codes-inline {
-            font-family: 'SF Mono', Monaco, Consolas, monospace;
-            font-size: 0.6875rem;
-            color: var(--text);
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 2px;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .code-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 1px 4px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            cursor: pointer;
-            font-size: 0.6875rem;
-            position: relative;
-            white-space: nowrap;
-        }
-
-        .code-tag:hover { background: #cbd5e1; }
-        .code-tag.duplicado { background: #fecaca; color: var(--danger); }
-
-        .code-pass {
-            font-size: 0.5625rem;
-            color: var(--text-muted);
-            margin-left: 2px;
-        }
-
-        .no-code {
-            color: var(--text-muted);
-            font-style: italic;
-            font-size: 0.6875rem;
-        }
-
-        /* ===== MENÚ CONTEXTUAL ===== */
-        .context-menu {
-            position: fixed;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            z-index: 1000;
-            min-width: 140px;
-            max-width: 200px;
-            max-height: 250px;
-            overflow-y: auto;
-            animation: fadeIn 0.15s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .context-menu-item {
-            padding: 8px 12px;
-            font-size: 0.8125rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .context-menu-item:last-child { border-bottom: none; }
-        .context-menu-item:hover { background: var(--bg); }
-        .context-menu-item.selected { background: #eff6ff; color: var(--primary); }
-
-        .context-menu-header {
-            padding: 6px 12px;
-            font-size: 0.6875rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            background: var(--bg);
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .context-menu-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: none;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.8125rem;
-            outline: none;
-        }
-
-        .context-menu-input:focus {
-            background: #eff6ff;
-        }
-
-        /* ===== LÍDERES COMPACTOS ===== */
-        .lideres-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-
-        .lider-card {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
-            border: 1px solid #bfdbfe;
-            border-radius: var(--radius);
-            padding: 6px 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .lider-card:active { transform: scale(0.98); }
-
-        .lider-card .name {
-            font-weight: 600;
-            font-size: 0.75rem;
-            color: var(--primary-dark);
-        }
-
-        .lider-card .codes {
-            font-size: 0.6875rem;
-            font-family: monospace;
-            color: var(--text-muted);
-        }
-
-        /* ===== FAB ===== */
-        .fab {
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            box-shadow: var(--shadow-lg);
-            cursor: pointer;
-            z-index: 90;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-
-        .fab:active { transform: scale(0.95); background: var(--primary-dark); }
-        .fab.open { transform: rotate(45deg); }
-
-        .fab-menu {
-            position: fixed;
-            bottom: 74px;
-            right: 16px;
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 90;
-        }
-
-        .fab-menu.open { display: flex; }
-
-        .fab-item {
-            background: white;
-            padding: 10px 14px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            font-size: 0.8125rem;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .fab-item:active { background: var(--bg); transform: translateX(-4px); }
-
-        /* ===== INLINE ADD FORM ===== */
-        .inline-add-form {
-            display: none;
-            padding: 8px;
-            background: #f0f9ff;
-            border: 1px dashed var(--primary);
-            border-radius: var(--radius);
-            margin: 4px 6px;
-        }
-
-        .inline-add-form.visible { display: block; }
-
-        .inline-add-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .inline-add-input {
-            flex: 1;
-            padding: 6px 10px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.8125rem;
-        }
-
-        .inline-add-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .inline-add-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 0.8125rem;
-            cursor: pointer;
-        }
-
-        .inline-add-btn.primary { background: var(--primary); color: white; }
-        .inline-add-btn.secondary { background: var(--border); color: var(--text); }
-
-        /* ===== HISTORIAL COMPACTO ===== */
-        .historial-item {
-            padding: 6px 8px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.6875rem;
-            background: white;
-            margin-bottom: 2px;
-            border-radius: 3px;
-            border-left: 2px solid var(--primary);
-        }
-
-        .historial-fecha {
-            color: var(--text-muted);
-            font-size: 0.5625rem;
-            margin-bottom: 2px;
-        }
-
-        .historial-accion {
-            font-weight: 700;
-            color: white;
-            background: var(--primary);
-            padding: 1px 4px;
-            border-radius: 2px;
-            font-size: 0.5625rem;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-bottom: 2px;
-        }
-
-        .historial-accion.transferencia { background: var(--warning); }
-        .historial-accion.eliminacion { background: var(--danger); }
-        .historial-accion.creacion { background: var(--success); }
-
-        .historial-detalle { color: var(--text); line-height: 1.3; }
-        .historial-codigo { font-family: monospace; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 0 2px; border-radius: 2px; }
-        .historial-asesor { font-weight: 600; }
-        .historial-flecha { color: var(--text-muted); margin: 0 3px; }
-
-        /* ===== TOAST ===== */
-        .toast-container {
-            position: fixed;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 250;
-            width: calc(100% - 24px);
-            max-width: 320px;
-            pointer-events: none;
-        }
-
-        .toast {
-            background: #1e293b;
-            color: white;
-            padding: 8px 12px;
-            border-radius: var(--radius);
-            font-size: 0.8125rem;
-            margin-bottom: 6px;
-            animation: toastIn 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: var(--shadow-lg);
-            pointer-events: auto;
-        }
-
-        .toast.success { background: var(--success); }
-        .toast.error { background: var(--danger); }
-        .toast.warning { background: var(--warning); }
-        .toast.info { background: var(--primary); }
-
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ===== LOADING ===== */
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.95);
-            z-index: 300;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .loading-overlay.visible { display: flex; }
-
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .offline-banner {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: #1e293b;
-            color: white;
-            padding: 8px 12px;
-            text-align: center;
-            font-size: 0.75rem;
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .offline-banner.visible { display: flex; }
-
-        .empty {
-            text-align: center;
-            padding: 16px;
-            color: var(--text-muted);
-            font-size: 0.8125rem;
-        }
-
-        /* ===== MODAL DE CONFIRMACIÓN ===== */
-        .confirm-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 400;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .confirm-modal.visible { display: flex; }
-
-        .confirm-content {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 320px;
-            width: calc(100% - 40px);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
-
-        .confirm-title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        .confirm-message {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-
-        .confirm-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .confirm-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .confirm-btn.primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .confirm-btn.danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .confirm-btn.secondary {
-            background: #e2e8f0;
-            color: var(--text);
-        }
-
-        .confirm-btn:active {
-            transform: scale(0.98);
-        }
-
-        .empty-icon { font-size: 1.5rem; margin-bottom: 4px; }
-
-        /* Overlay para cerrar menús */
-        .menu-overlay {
-
-        .empty-icon { font-size: 1.5rem; margin-bottom: 4px; }
-
-        /* Overlay para cerrar menús */
-        .menu-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 999;
-            display: none;
-        }
-
-        .menu-overlay.visible { display: block; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gestión de Códigos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #f5f5f7;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f0f0f2;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-muted: #999999;
+      --accent-blue: #007aff;
+      --accent-green: #34c759;
+      --accent-red: #ff3b30;
+      --accent-yellow: #ff9500;
+      --accent-purple: #af52de;
+      --border-color: #e5e5e7;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      font-size: 15px;
+      padding-bottom: 100px;
+    }
+
+    /* ============ HEADER ============ */
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      padding: 20px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      flex: 1;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-input {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 250px;
+      outline: none;
+    }
+
+    .header-title-input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .header-date {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 6px;
+    }
+
+    .header-date-input {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: rgba(255,255,255,0.9);
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      outline: none;
+      width: 100%;
+      max-width: 200px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      background: rgba(255,255,255,0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-badge.green { background: rgba(52, 199, 89, 0.3); }
+    .stat-badge.red { background: rgba(255, 59, 48, 0.3); }
+    .stat-badge.yellow { background: rgba(255, 149, 0, 0.3); }
+    .stat-badge.purple { background: rgba(175, 82, 222, 0.3); }
+
+    /* ============ SYNC INDICATOR ============ */
+    .sync-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .sync-indicator.syncing {
+      background: var(--accent-yellow);
+      animation: pulse 1s infinite;
+    }
+
+    .sync-indicator.error {
+      background: var(--accent-red);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* ============ ALERTS ============ */
+    .alerts-container {
+      padding: 12px 16px 0;
+    }
+
+    .alert {
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #991b1b;
+    }
+
+    .alert.warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+
+    .alert.info {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+
+    /* ============ SECTIONS ============ */
+    .section {
+      margin: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 4px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-count {
+      background: var(--bg-card);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+
+    .section-toggle {
+      background: var(--bg-card);
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ============ DROP ZONE ============ */
+    .drop-zone {
+      min-height: 60px;
+      border: 2px dashed transparent;
+      border-radius: var(--radius);
+      transition: all 0.3s ease;
+      padding: 4px;
+    }
+
+    .drop-zone.drag-active {
+      border-color: var(--accent-blue);
+      background: rgba(0, 122, 255, 0.05);
+    }
+
+    .drop-zone.drag-over {
+      border-color: var(--accent-green);
+      background: rgba(52, 199, 89, 0.1);
+    }
+
+    /* ============ CARDS ============ */
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .asesor-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+      box-shadow: var(--shadow);
+      touch-action: none;
+    }
+
+    .asesor-card.editing {
+      border-color: var(--accent-blue);
+      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    .asesor-card.dragging {
+      opacity: 0.6;
+      transform: scale(0.97);
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+    }
+
+    .asesor-card.drag-over {
+      border-color: var(--accent-green);
+      background: rgba(52, 199, 89, 0.05);
+    }
+
+    .asesor-card.duplicado {
+      border-color: var(--accent-red);
+      box-shadow: var(--shadow), 0 0 0 3px rgba(255, 59, 48, 0.15);
+    }
+
+    .asesor-card.prestado {
+      border-color: var(--accent-purple);
+    }
+
+    /* ============ DRAG HANDLE ============ */
+    .drag-handle {
+      width: 28px;
+      height: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: grab;
+      flex-shrink: 0;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      margin: -4px 0;
+      touch-action: none;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+      background: var(--border-color);
+    }
+
+    .drag-handle span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-muted);
+      border-radius: 1px;
+    }
+
+    /* ============ STATUS INDICATOR ============ */
+    .status-indicator {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      border: 2px solid transparent;
+    }
+
+    .status-indicator:active {
+      transform: scale(0.88);
+    }
+
+    .status-indicator.asistente {
+      background: rgba(52, 199, 89, 0.15);
+      border-color: rgba(52, 199, 89, 0.3);
+    }
+
+    .status-indicator.inasistente {
+      background: rgba(255, 59, 48, 0.15);
+      border-color: rgba(255, 59, 48, 0.3);
+    }
+
+    .status-indicator.sin-codigo {
+      background: rgba(255, 149, 0, 0.15);
+      border-color: rgba(255, 149, 0, 0.3);
+    }
+
+    /* ============ ASESOR INFO ============ */
+    .asesor-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .asesor-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .asesor-name-input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 15px;
+      width: 100%;
+      outline: none;
+      padding: 0;
+    }
+
+    .asesor-name-input:focus {
+      background: var(--bg-primary);
+      padding: 6px 10px;
+      margin: -6px -10px;
+      border-radius: 6px;
+    }
+
+    .tipo-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .tipo-badge.lider {
+      background: linear-gradient(135deg, #ff9500, #ff6b00);
+      color: #ffffff;
+    }
+
+    .tipo-badge.ojt {
+      background: rgba(175, 82, 222, 0.2);
+      color: var(--accent-purple);
+    }
+
+    .codigos-container {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .codigo-input-wrapper {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .codigo-input {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      color: var(--accent-blue);
+      width: 100%;
+      outline: none;
+    }
+
+    .codigo-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .codigo-tag {
+      background: rgba(0, 122, 255, 0.1);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      color: var(--accent-blue);
+      font-weight: 500;
+    }
+
+    .codigo-tag.prestado-de {
+      background: rgba(175, 82, 222, 0.15);
+      color: var(--accent-purple);
+    }
+
+    .observaciones-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-style: italic;
+      outline: none;
+    }
+
+    .observaciones-input:focus {
+      background: var(--bg-primary);
+      padding: 4px 8px;
+      margin: 2px -8px;
+      border-radius: 4px;
+    }
+
+    .observaciones-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    /* ============ CARD ACTIONS ============ */
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: none;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.9);
+      background: var(--border-color);
+    }
+
+    .action-btn.delete {
+      color: var(--accent-red);
+    }
+
+    .action-btn.delete:active {
+      background: rgba(255, 59, 48, 0.1);
+    }
+
+    .action-btn.save {
+      color: var(--accent-green);
+      background: rgba(52, 199, 89, 0.1);
+    }
+
+    /* ============ TIPO SELECTOR INLINE ============ */
+    .tipo-selector {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tipo-option {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .tipo-option.active {
+      border-color: var(--accent-blue);
+      background: rgba(0, 122, 255, 0.1);
+      color: var(--accent-blue);
+    }
+
+    /* ============ LIDERES GRID ============ */
+    .lideres-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .lider-card {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-radius: var(--radius);
+      padding: 14px;
+      border: 2px solid rgba(255, 149, 0, 0.3);
+      box-shadow: var(--shadow);
+      touch-action: none;
+    }
+
+    .lider-card.dragging {
+      opacity: 0.6;
+    }
+
+    .lider-card.drag-over {
+      border-color: var(--accent-green);
+    }
+
+    .lider-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #b45309;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lider-codigos {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lider-codigo {
+      background: rgba(180, 83, 9, 0.15);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      color: #b45309;
+      font-weight: 500;
+    }
+
+    /* ============ NEW CARD ============ */
+    .new-card {
+      background: var(--bg-card);
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 60px;
+    }
+
+    .new-card:active {
+      background: var(--bg-primary);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .new-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--accent-blue);
+    }
+
+    /* ============ TOAST ============ */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 16px;
+      right: 16px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--text-primary);
+      color: var(--bg-card);
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastIn 0.3s ease;
+      box-shadow: var(--shadow-lg);
+      pointer-events: auto;
+    }
+
+    @keyframes toastIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* ============ EMPTY STATE ============ */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    /* ============ LOADING ============ */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      gap: 16px;
+    }
+
+    .loading-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ============ DUPLICATE BADGE ============ */
+    .duplicate-badge {
+      background: var(--accent-red);
+      color: white;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* ============ CONFIRM DELETE ============ */
+    .delete-confirm {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 59, 48, 0.95);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .delete-confirm-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .delete-confirm-btn.yes {
+      background: #ffffff;
+      color: var(--accent-red);
+    }
+
+    .delete-confirm-btn.no {
+      background: rgba(255,255,255,0.2);
+      color: #ffffff;
+    }
+
+    /* ============ REFRESH BUTTON ============ */
+    .refresh-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: var(--accent-blue);
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      transition: transform 0.2s;
+    }
+
+    .refresh-btn:active {
+      transform: scale(0.9);
+    }
+
+    .refresh-btn.spinning {
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
 </head>
 <body>
-    <!-- Loading -->
-    <div class="loading-overlay" id="loading">
-        <div class="spinner"></div>
-        <span style="font-size: 0.8125rem; color: var(--text-muted);">Cargando...</span>
+  <!-- Loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando datos...</div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="header-title">
+          <input type="text" class="header-title-input" id="headerTitulo" 
+                 placeholder="Nombre del equipo" 
+                 onchange="saveConfig('titulo', this.value)">
+          <div class="sync-indicator" id="syncIndicator"></div>
+        </div>
+        <div class="header-date">
+          <input type="text" class="header-date-input" id="headerFecha" 
+                 placeholder="Fecha"
+                 onchange="saveConfig('fecha', this.value)">
+        </div>
+      </div>
     </div>
+    <div class="header-stats" id="headerStats"></div>
+  </header>
 
-    <!-- Offline Banner -->
-    <div class="offline-banner" id="offlineBanner">
-        <span>📴</span>
-        <span>Sin conexión - Cambios guardados localmente</span>
+  <!-- Alerts Container -->
+  <div class="alerts-container" id="alertsContainer"></div>
+
+  <!-- Inasistencias Section -->
+  <section class="section" id="sectionInasistencias">
+    <div class="section-header">
+      <div class="section-title">
+        <span>❌ Inasistencias</span>
+        <span class="section-count" id="countInasistencias">0</span>
+      </div>
+      <button class="section-toggle" onclick="toggleSection('inasistencias')">▼</button>
     </div>
-
-    <!-- Toasts -->
-    <div class="toast-container" id="toasts"></div>
-
-    <!-- Menu Overlay -->
-    <div class="menu-overlay" id="menuOverlay" onclick="App.ui.closeAllMenus()"></div>
-
-    <!-- Modal de Confirmación -->
-    <div class="confirm-modal" id="confirmModal">
-        <div class="confirm-content">
-            <div class="confirm-title" id="confirmTitle">Confirmar acción</div>
-            <div class="confirm-message" id="confirmMessage"></div>
-            <div class="confirm-buttons">
-                <button class="confirm-btn secondary" id="confirmCancel">Cancelar</button>
-                <button class="confirm-btn primary" id="confirmOk">Confirmar</button>
-            </div>
-        </div>
+    <div class="drop-zone" id="dropInasistencias" data-section="inasistencias">
+      <div class="card-list" id="listInasistencias"></div>
     </div>
+  </section>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-row">
-            <div class="header-info">
-                <div class="header-title" id="teamName">Equipo</div>
-                <div class="header-date" id="teamDate"></div>
-            </div>
-            <div class="header-actions">
-                <button class="h-btn" id="undoBtn" onclick="App.actions.undo()" title="Deshacer" style="display:none;">↶</button>
-                <button class="h-btn" onclick="App.sync.forceSync()" title="Sincronizar">🔄</button>
-            </div>
-        </div>
-        <div class="sync-badge">
-            <span class="sync-dot" id="syncDot"></span>
-            <span id="syncText">Conectando...</span>
-        </div>
-    </header>
-
-    <!-- Stats -->
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-val" id="sTotal">0</div>
-            <div class="stat-lbl">Total</div>
-        </div>
-        <div class="stat">
-            <div class="stat-val" id="sAsist">0</div>
-            <div class="stat-lbl">Asistentes</div>
-        </div>
-        <div class="stat">
-            <div class="stat-val" id="sInasist">0</div>
-            <div class="stat-lbl">Inasist.</div>
-        </div>
-        <div class="stat">
-            <div class="stat-val" id="sCodigos">0</div>
-            <div class="stat-lbl">Códigos</div>
-        </div>
+  <!-- Líderes Section -->
+  <section class="section" id="sectionLideres">
+    <div class="section-header">
+      <div class="section-title">
+        <span>👑 Líderes</span>
+        <span class="section-count" id="countLideres">0</span>
+      </div>
+      <button class="section-toggle" onclick="toggleSection('lideres')">▼</button>
     </div>
-
-    <!-- Alertas -->
-    <div class="alert-bar" id="alertBar" onclick="App.ui.toggleAlertsPanel()">
-        <span>⚠️</span>
-        <span id="alertText">0 alertas</span>
-        <span style="margin-left:auto;" id="alertArrow">Ver ›</span>
+    <div class="drop-zone" id="dropLideres" data-section="lideres">
+      <div class="lideres-grid" id="listLideres"></div>
     </div>
+  </section>
 
-    <!-- Panel de Alertas Detallado -->
-    <div class="alerts-panel" id="alertsPanel"></div>
-
-    <!-- Cola -->
-    <div class="queue-indicator" id="queueIndicator">
-        <span>🔄</span>
-        <span id="queueText">0 pendientes</span>
+  <!-- Asesores Section -->
+  <section class="section" id="sectionAsesores">
+    <div class="section-header">
+      <div class="section-title">
+        <span>✅ Asesores</span>
+        <span class="section-count" id="countAsesores">0</span>
+      </div>
+      <button class="section-toggle" onclick="toggleSection('asesores')">▼</button>
     </div>
-
-    <!-- Búsqueda -->
-    <div class="search-wrap">
-        <input type="text" class="search-input" id="searchInput" placeholder="Buscar asesor o código...">
+    <div class="drop-zone" id="dropAsesores" data-section="asesores">
+      <div class="card-list" id="listAsesores"></div>
+      <!-- Botón para agregar nuevo -->
+      <div class="new-card" onclick="createNewAsesor()">
+        <div class="new-card-icon">+</div>
+        <span>Agregar nuevo asesor</span>
+      </div>
     </div>
+  </section>
 
-    <!-- Formulario inline para agregar -->
-    <div class="inline-add-form" id="addForm">
-        <div class="inline-add-row">
-            <input type="text" class="inline-add-input" id="addNombre" placeholder="Nombre del asesor">
-            <input type="text" class="inline-add-input" id="addCodigo" placeholder="Código" style="width:80px;">
-            <input type="text" class="inline-add-input" id="addClave" placeholder="Clave" style="width:60px;">
-            <button class="inline-add-btn primary" onclick="App.actions.quickAddAsesor()">✓</button>
-            <button class="inline-add-btn secondary" onclick="App.ui.hideAddForm()">✕</button>
-        </div>
-    </div>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Sección Inasistencias -->
-    <section class="section" id="secInasist">
-        <div class="section-head" onclick="App.ui.toggleSection('secInasist')">
-            <h2>❌ Inasistencias <span class="cnt" id="cntInasist">0</span></h2>
-            <span class="arrow">▼</span>
-        </div>
-        <div class="section-body" id="listInasist"></div>
-    </section>
+  <!-- Refresh Button -->
+  <button class="refresh-btn" id="refreshBtn" onclick="forceSync()">↻</button>
 
-    <!-- Líderes -->
-    <section class="section" id="secLideres">
-        <div class="section-head" onclick="App.ui.toggleSection('secLideres')">
-            <h2>👑 Líderes <span class="cnt" id="cntLideres">0</span></h2>
-            <span class="arrow">▼</span>
-        </div>
-        <div class="section-body" id="listLideres"></div>
-    </section>
-
-    <!-- Asesores -->
-    <section class="section" id="secAsesores">
-        <div class="section-head" onclick="App.ui.toggleSection('secAsesores')">
-            <h2>👥 Asesores <span class="cnt" id="cntAsesores">0</span></h2>
-            <span class="arrow">▼</span>
-        </div>
-        <div class="section-body" id="listAsesores"></div>
-    </section>
-
-    <!-- Historial -->
-    <section class="section collapsed" id="secHistorial">
-        <div class="section-head" onclick="App.ui.toggleSection('secHistorial')">
-            <h2>📋 Historial <span class="cnt" id="cntHistorial">0</span></h2>
-            <span class="arrow">▼</span>
-        </div>
-        <div class="section-body" id="listHistorial"></div>
-    </section>
-
-    <!-- FAB -->
-    <div class="fab-menu" id="fabMenu">
-        <div class="fab-item" onclick="App.ui.showAddForm()">👤 Agregar asesor</div>
-        <div class="fab-item" onclick="App.actions.copyFormat()">📋 Copiar formato</div>
-        <div class="fab-item" onclick="App.ui.toggleSection('secHistorial'); App.ui.closeFab();">📜 Ver historial</div>
-        <div class="fab-item" onclick="App.sync.forceSync()">🔄 Sincronizar ahora</div>
-        <div class="fab-item" onclick="App.actions.exportBackup()">💾 Exportar backup</div>
-    </div>
-    <button class="fab" id="fabBtn" onclick="App.ui.toggleFab()">+</button>
-
-<script>
-// ============================================================
-// APLICACIÓN - Gestión de Códigos v6.0 CORREGIDA
-// ============================================================
-
-const App = (function() {
-    'use strict';
-
-    // ===================== CONFIGURACIÓN =====================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxgz0yIfmySUmgw-CZ2j1dNnHjsnnqg9hMSU63rva_q1soxojTalm2Bxlzyl75GVhTp/exec';
-    const STORAGE_KEY = 'gestion_codigos_v6';
-    const QUEUE_KEY = 'gestion_codigos_queue_v6';
-    const CLIENT_ID = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
-
-    // ===================== ESTADO GLOBAL =====================
-    const state = {
-        asesores: [],
-        codigos: [],
-        config: { Equipo: 'Equipo' },
-        alerts: [],
-        historial: [],
-        version: 0,
-        isOnline: navigator.onLine,
-        isSyncing: false,
-        lastSync: null,
-        undoStack: []
+  <script>
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
+    const API = "https://script.google.com/macros/s/AKfycbxgz0yIfmySUmgw-CZ2j1dNnHjsnnqg9hMSU63rva_q1soxojTalm2Bxlzyl75GVhTp/exec";
+    
+    // ============================================
+    // ESTADO
+    // ============================================
+    let state = {
+      asesores: [],
+      config: { titulo: '', fecha: '' },
+      lastUpdate: 0
     };
-
-    let operationQueue = [];
-    let jsonpCounter = 0;
-    let syncTimer = null;
-
-    // Variables para sincronización optimista
-    const pendingOps = {
-        eliminar: {},
-        crear: {},
-        actualizar: {},
-        mover: false
-    };
-    const TIMEOUT_OP = 15000;
-    const GRACE_TIME = 3000;
-
-    // ===================== UTILIDADES =====================
-    const Utils = {
-        genId: () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8),
-        genOpId: () => 'op_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8),
-        debounce: (fn, delay) => {
-            let timer;
-            return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
-        },
-        escapeHtml: (str) => {
-            if (!str) return '';
-            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        },
-        getCurrentDate: () => {
-            const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-            const now = new Date();
-            return `${dias[now.getDay()]} ${now.getDate()} de ${meses[now.getMonth()]}`;
-        }
-    };
-
-    // ===================== ALMACENAMIENTO =====================
-    const Storage = {
-        saveState: () => {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    asesores: state.asesores,
-                    codigos: state.codigos,
-                    config: state.config,
-                    historial: state.historial,
-                    version: state.version,
-                    lastSync: state.lastSync
-                }));
-            } catch (e) { console.error('Error guardando:', e); }
-        },
-        loadState: () => {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                console.log('Intentando cargar desde localStorage...', stored ? 'Datos encontrados' : 'Sin datos');
-                
-                if (stored) {
-                    const data = JSON.parse(stored);
-                    console.log('Datos parseados:', {
-                        asesores: data.asesores?.length || 0,
-                        codigos: data.codigos?.length || 0,
-                        version: data.version
-                    });
-                    
-                    if (data && data.asesores) {
-                        Object.assign(state, data);
-                        console.log('Estado cargado exitosamente');
-                        return true;
-                    }
-                }
-                console.log('No hay datos válidos en localStorage');
-                return false;
-            } catch (e) {
-                console.error('Error cargando estado:', e);
-                return false;
-            }
-        },
-        saveQueue: () => {
-            try { localStorage.setItem(QUEUE_KEY, JSON.stringify(operationQueue)); } catch (e) {}
-        },
-        loadQueue: () => {
-            try {
-                const queue = JSON.parse(localStorage.getItem(QUEUE_KEY));
-                if (Array.isArray(queue)) { operationQueue = queue; return true; }
-            } catch (e) {}
-            operationQueue = [];
-            return false;
-        },
-        clearQueue: () => {
-            operationQueue = [];
-            localStorage.removeItem(QUEUE_KEY);
-        }
-    };
-
-    // ===================== API =====================
-    const API = {
-        call: (params, timeout = 15000) => {
-            return new Promise((resolve, reject) => {
-                jsonpCounter++;
-                const callbackName = 'cb' + jsonpCounter + '_' + Date.now();
-                let timeoutId, resolved = false;
-
-                window[callbackName] = (response) => {
-                    if (resolved) return;
-                    resolved = true;
-                    clearTimeout(timeoutId);
-                    delete window[callbackName];
-                    document.getElementById('s_' + callbackName)?.remove();
-                    resolve(response);
-                };
-
-                timeoutId = setTimeout(() => {
-                    if (resolved) return;
-                    resolved = true;
-                    delete window[callbackName];
-                    document.getElementById('s_' + callbackName)?.remove();
-                    reject(new Error('Timeout'));
-                }, timeout);
-
-                let url = API_URL + '?callback=' + callbackName + '&_=' + Date.now();
-                for (const key in params) {
-                    const val = typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key];
-                    url += '&' + key + '=' + encodeURIComponent(val);
-                }
-
-                const script = document.createElement('script');
-                script.id = 's_' + callbackName;
-                script.src = url;
-                script.onerror = () => {
-                    if (resolved) return;
-                    resolved = true;
-                    clearTimeout(timeoutId);
-                    delete window[callbackName];
-                    script.remove();
-                    reject(new Error('Red'));
-                };
-                document.body.appendChild(script);
-            });
-        },
-        getData: async () => {
-            const response = await API.call({ action: 'getData' }, 15000);
-            if (response?.success) return response.data;
-            throw new Error(response?.error || 'Error');
-        },
-        syncBatch: async (operations) => {
-            const data = JSON.stringify({ action: 'syncBatch', operations, clientId: CLIENT_ID });
-            return API.call({ action: 'syncBatch', data }, 20000);
-        }
-    };
-
-    // ===================== SINCRONIZACIÓN SIMPLIFICADA =====================
-    const Sync = {
-        enqueue: (type, data) => {
-            const operation = {
-                operationId: Utils.genOpId(),
-                type,
-                data,
-                timestamp: Date.now(),
-                retries: 0,
-                status: 'pending'
-            };
-            operationQueue.push(operation);
-            Storage.saveQueue();
-            Sync.updateQueueIndicator();
-            Sync.scheduleSync();
-            return operation.operationId;
-        },
-        
-        scheduleSync: () => {
-            if (syncTimer) clearTimeout(syncTimer);
-            syncTimer = setTimeout(() => {
-                syncTimer = null;
-                Sync.processQueue();
-            }, 2000);
-        },
-        
-        processQueue: async () => {
-            if (state.isSyncing || !state.isOnline) return;
-            
-            const pendingOps = operationQueue.filter(op => op.status === 'pending');
-            if (pendingOps.length === 0) {
-                UI.setSyncStatus('synced', 'Sincronizado');
-                return;
-            }
-
-            state.isSyncing = true;
-            UI.setSyncStatus('syncing', 'Guardando ' + pendingOps.length + '...');
-
-            try {
-                const batch = pendingOps.slice(0, 10);
-                const response = await API.syncBatch(batch);
-                
-                if (response?.success && response.results) {
-                    response.results.forEach(result => {
-                        const idx = operationQueue.findIndex(op => op.operationId === result.operationId);
-                        if (idx !== -1) {
-                            if (result.success || result.skipped) {
-                                operationQueue.splice(idx, 1);
-                            } else {
-                                operationQueue[idx].retries++;
-                                if (operationQueue[idx].retries >= 3) {
-                                    operationQueue.splice(idx, 1);
-                                }
-                            }
-                        }
-                    });
-                    Storage.saveQueue();
-                    
-                    const remaining = operationQueue.filter(op => op.status === 'pending');
-                    if (remaining.length > 0) {
-                        setTimeout(() => Sync.processQueue(), 1000);
-                    } else {
-                        UI.setSyncStatus('synced', 'Sincronizado');
-                    }
-                } else {
-                    throw new Error('Respuesta inválida');
-                }
-            } catch (error) {
-                console.error('Error sync:', error);
-                UI.setSyncStatus('error', 'Error - Reintentando...');
-                setTimeout(() => Sync.processQueue(), 5000);
-            } finally {
-                state.isSyncing = false;
-                Sync.updateQueueIndicator();
-            }
-        },
-        
-        forceSync: async () => {
-            if (state.isSyncing) {
-                console.log('Ya hay sincronización en curso');
-                return;
-            }
-            
-            if (pendingOps.mover || Object.keys(pendingOps.eliminar).length > 0 || 
-                Object.keys(pendingOps.crear).length > 0 || Object.keys(pendingOps.actualizar).length > 0) {
-                console.log('Hay operaciones pendientes, esperando...');
-                UI.setSyncStatus('syncing', 'Guardando cambios...');
-                setTimeout(() => Sync.forceSync(), 2000);
-                return;
-            }
-            
-            state.isSyncing = true;
-            UI.setSyncStatus('syncing', 'Sincronizando...');
-            console.log('Iniciando sincronización con servidor...');
-            
-            try {
-                const data = await API.getData();
-                console.log('Datos recibidos del servidor:', data);
-                
-                if (data) {
-                    let asesoresFiltrados = data.asesores || [];
-                    let codigosFiltrados = data.codigos || [];
-                    
-                    const ahora = Date.now();
-                    
-                    for (const id in pendingOps.eliminar) {
-                        if (ahora - pendingOps.eliminar[id] < TIMEOUT_OP) {
-                            asesoresFiltrados = asesoresFiltrados.filter(a => a.ID !== id);
-                            codigosFiltrados = codigosFiltrados.filter(c => c.ID !== id);
-                        } else {
-                            delete pendingOps.eliminar[id];
-                        }
-                    }
-                    
-                    for (const tempId in pendingOps.crear) {
-                        if (ahora - pendingOps.crear[tempId] > TIMEOUT_OP) {
-                            delete pendingOps.crear[tempId];
-                        }
-                    }
-                    
-                    state.asesores = asesoresFiltrados;
-                    state.codigos = codigosFiltrados;
-                    if (data.config) state.config = data.config;
-                    if (data.historial) state.historial = data.historial;
-                    state.version = data.version || Date.now();
-                    state.lastSync = new Date().toISOString();
-                    state.isOnline = true;
-                    
-                    Storage.saveState();
-                    Render.all();
-                    
-                    UI.setSyncStatus('synced', 'Sincronizado ✓');
-                    console.log('Sincronización exitosa');
-                    
-                    if (operationQueue.length > 0) {
-                        setTimeout(() => Sync.processQueue(), 500);
-                    }
-                }
-            } catch (error) {
-                console.error('Error en forceSync:', error);
-                state.isOnline = false;
-                
-                if (state.asesores.length > 0) {
-                    UI.setSyncStatus('offline', 'Modo local');
-                    Render.all();
-                } else {
-                    UI.setSyncStatus('error', 'Error de conexión');
-                }
-            } finally {
-                state.isSyncing = false;
-            }
-        },
-        
-        updateQueueIndicator: () => {
-            const pending = operationQueue.filter(op => op.status === 'pending').length;
-            const indicator = document.getElementById('queueIndicator');
-            if (pending > 0) {
-                indicator.classList.add('visible');
-                document.getElementById('queueText').textContent = pending + ' pendiente' + (pending > 1 ? 's' : '');
-            } else {
-                indicator.classList.remove('visible');
-            }
-        }
-    };
-
-    // ===================== CRUD =====================
-    const CRUD = {
-        addAsesor: (datos) => {
-            const maxPos = state.asesores.reduce((max, a) => Math.max(max, a.Posicion || 0), 0);
-            const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
-            const asesor = {
-                ID: tempId,
-                Nombre: datos.nombre,
-                Rol: datos.rol || 'asesor',
-                Estado: datos.estado || 'asistente',
-                Posicion: maxPos + 1,
-                Observaciones: datos.obs || '',
-                OJT: datos.ojt || false
-            };
-            
-            pendingOps.crear[tempId] = Date.now();
-            
-            state.asesores.push(asesor);
-            Storage.saveState();
-            Render.all();
-            
-            const asesorParaServidor = { ...asesor, ID: Utils.genId() };
-            const idReal = asesorParaServidor.ID;
-            
-            const opId = Sync.enqueue('addAsesor', asesorParaServidor);
-            
-            const checkSuccess = setInterval(() => {
-                const op = operationQueue.find(o => o.operationId === opId);
-                if (!op) {
-                    clearInterval(checkSuccess);
-                    const idx = state.asesores.findIndex(a => a.ID === tempId);
-                    if (idx !== -1) {
-                        state.asesores[idx].ID = idReal;
-                        Storage.saveState();
-                    }
-                    setTimeout(() => {
-                        delete pendingOps.crear[tempId];
-                    }, GRACE_TIME);
-                }
-            }, 500);
-            
-            setTimeout(() => {
-                clearInterval(checkSuccess);
-                if (pendingOps.crear[tempId]) {
-                    delete pendingOps.crear[tempId];
-                }
-            }, TIMEOUT_OP);
-            
-            if (datos.codigo) {
-                setTimeout(() => {
-                    const asesorActual = state.asesores.find(a => a.ID === tempId || a.ID === idReal);
-                    if (asesorActual) {
-                        CRUD.addCodigo(asesorActual.ID, datos.codigo, datos.clave);
-                    }
-                }, 100);
-            }
-            
-            return asesor;
-        },
-        
-        updateAsesor: (id, cambios) => {
-            const idx = state.asesores.findIndex(a => a.ID === id);
-            if (idx === -1) return false;
-            Object.assign(state.asesores[idx], cambios);
-            Storage.saveState();
-            Sync.enqueue('updateAsesor', { ID: id, ...cambios });
-            Render.all();
-            return true;
-        },
-        
-        deleteAsesor: (id) => {
-            const asesorEliminado = state.asesores.find(a => a.ID === id);
-            const indiceEliminado = state.asesores.findIndex(a => a.ID === id);
-            
-            if (!asesorEliminado) return false;
-            
-            pendingOps.eliminar[id] = Date.now();
-            
-            const codigosAsesor = state.codigos.filter(c => c.AsesorID === id);
-            codigosAsesor.forEach(c => {
-                c.AsesorID = '';
-                Sync.enqueue('updateCodigo', { ID: c.ID, AsesorID: '' });
-            });
-            
-            state.asesores = state.asesores.filter(a => a.ID !== id);
-            Storage.saveState();
-            Render.all();
-            
-            const opId = Sync.enqueue('deleteAsesor', { ID: id });
-            
-            const checkSuccess = setInterval(() => {
-                const op = operationQueue.find(o => o.operationId === opId);
-                if (!op) {
-                    clearInterval(checkSuccess);
-                    setTimeout(() => {
-                        delete pendingOps.eliminar[id];
-                    }, GRACE_TIME);
-                }
-            }, 500);
-            
-            setTimeout(() => {
-                clearInterval(checkSuccess);
-                if (pendingOps.eliminar[id]) {
-                    delete pendingOps.eliminar[id];
-                }
-            }, TIMEOUT_OP);
-            
-            return true;
-        },
-        
-        addCodigo: (asesorId, codigo, pass) => {
-            // Validar duplicados
-            const codigoNorm = codigo.toLowerCase().trim();
-            const duplicado = state.codigos.find(c => c.Codigo.toLowerCase().trim() === codigoNorm);
-            
-            if (duplicado) {
-                const asesor = state.asesores.find(a => a.ID === duplicado.AsesorID);
-                const nombreDup = asesor ? asesor.Nombre : 'otro asesor';
-                UI.toast(`⚠️ El código "${codigo}" ya está asignado a ${nombreDup}`, 'error');
-                return null;
-            }
-            
-            const c = {
-                ID: Utils.genId(),
-                Codigo: codigo,
-                Contrasena: pass || '',
-                AsesorID: asesorId
-            };
-            state.codigos.push(c);
-            Storage.saveState();
-            Sync.enqueue('addCodigo', c);
-            Render.all();
-            return c;
-        },
-        
-        updateCodigo: (id, cambios) => {
-            const idx = state.codigos.findIndex(c => c.ID === id);
-            if (idx === -1) return false;
-            Object.assign(state.codigos[idx], cambios);
-            Storage.saveState();
-            Sync.enqueue('updateCodigo', { ID: id, ...cambios });
-            Render.all();
-            return true;
-        },
-        
-        transferCodigo: (codigoId, nuevoAsesorId) => {
-            const codigo = state.codigos.find(c => c.ID === codigoId);
-            if (!codigo) return false;
-            
-            const asesorOrigen = state.asesores.find(a => a.ID === codigo.AsesorID);
-            const asesorDestino = state.asesores.find(a => a.ID === nuevoAsesorId);
-            
-            CRUD.registrarMovimiento('Transferencia', codigo.Codigo,
-                asesorOrigen ? asesorOrigen.Nombre : 'Sin asignar',
-                asesorDestino ? asesorDestino.Nombre : 'Sin asignar');
-            
-            CRUD.updateCodigo(codigoId, { AsesorID: nuevoAsesorId });
-            return true;
-        },
-        
-        registrarMovimiento: (accion, codigo, de, a) => {
-            const mov = {
-                fecha: new Date().toLocaleString(),
-                accion,
-                codigo,
-                de,
-                a
-            };
-            state.historial.unshift(mov);
-            if (state.historial.length > 50) state.historial.pop();
-            Sync.enqueue('registrarMovimiento', mov);
-            Render.historial();
-        },
-        
-        // FUNCIÓN PRINCIPAL PARA REORDENAR
-        reorderSection: (seccion) => {
-            let lista;
-            if (seccion === 'lider') {
-                lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
-            } else if (seccion === 'inasist') {
-                lista = state.asesores.filter(a => a.Estado === 'inasistente');
-            } else {
-                lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
-            }
-            
-            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-            
-            const orden = [];
-            lista.forEach((asesor, index) => {
-                const nuevaPos = index + 1;
-                const stateIdx = state.asesores.findIndex(a => a.ID === asesor.ID);
-                if (stateIdx !== -1) {
-                    state.asesores[stateIdx].Posicion = nuevaPos;
-                }
-                orden.push({ ID: asesor.ID, posicion: nuevaPos });
-            });
-            
-            Storage.saveState();
-            
-            if (orden.length > 0) {
-                Sync.enqueue('reorderAsesores', { orden });
-            }
-        }
-    };
-
-    // ===================== RENDERIZADO =====================
-    const Render = {
-        all: () => {
-            try {
-                console.log('Renderizando todo...');
-                Render.config();
-                Render.stats();
-                Render.detectAlerts();
-                Render.inasistencias();
-                Render.lideres();
-                Render.asesores();
-                Render.historial();
-                console.log('Renderizado completo');
-            } catch (error) {
-                console.error('Error en Render.all():', error);
-            }
-        },
-        config: () => {
-            document.getElementById('teamName').textContent = state.config.Equipo || 'Equipo';
-            document.getElementById('teamDate').textContent = Utils.getCurrentDate();
-        },
-        stats: () => {
-            const total = state.asesores.length;
-            const asist = state.asesores.filter(a => a.Estado !== 'inasistente').length;
-            const inasist = total - asist;
-            const codes = state.codigos.filter(c => {
-                const a = state.asesores.find(x => x.ID === c.AsesorID);
-                return a && a.Estado !== 'inasistente';
-            }).length;
-            document.getElementById('sTotal').textContent = total;
-            document.getElementById('sAsist').textContent = asist;
-            document.getElementById('sInasist').textContent = inasist;
-            document.getElementById('sCodigos').textContent = codes;
-        },
-        inasistencias: () => {
-            const lista = state.asesores.filter(a => a.Estado === 'inasistente');
-            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-            document.getElementById('cntInasist').textContent = lista.length;
-            const container = document.getElementById('listInasist');
-            if (lista.length === 0) {
-                container.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div>Sin inasistencias</div>';
-            } else {
-                container.innerHTML = lista.map(a => Render.asesorRow(a, 'inasist')).join('');
-            }
-        },
-        lideres: () => {
-            const lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
-            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-            document.getElementById('cntLideres').textContent = lista.length;
-            const container = document.getElementById('listLideres');
-            if (lista.length === 0) {
-                container.innerHTML = '<div class="empty">Sin líderes</div>';
-            } else {
-                container.innerHTML = lista.map(a => Render.asesorRow(a, 'lider')).join('');
-            }
-        },
-        asesores: () => {
-            const busqueda = document.getElementById('searchInput').value.toLowerCase();
-            let lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
-            if (busqueda) {
-                lista = lista.filter(a => {
-                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-                    return a.Nombre.toLowerCase().includes(busqueda) ||
-                           codes.some(c => c.Codigo.toLowerCase().includes(busqueda));
-                });
-            }
-            lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-            document.getElementById('cntAsesores').textContent = lista.length;
-            const container = document.getElementById('listAsesores');
-            if (lista.length === 0) {
-                container.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Sin asesores</div>';
-            } else {
-                container.innerHTML = lista.map(a => Render.asesorRow(a, 'asesor')).join('');
-            }
-        },
-        asesorRow: (a, section) => {
-            const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-            
-            // Determinar clases y estado visual
-            let rowClass = section === 'lider' ? 'lider' : '';
-            let statusEmoji = '✅';
-            let alertIcon = '';
-            
-            // Detectar si tiene códigos duplicados
-            const dupIds = [];
-            state.alerts.forEach(alert => { 
-                if (alert.type === 'duplicate' && alert.codigoIds) {
-                    dupIds.push(...alert.codigoIds);
-                }
-            });
-            
-            const tieneDuplicado = codes.some(c => dupIds.includes(c.ID));
-            
-            // Determinar estado
-            if (a.Estado === 'inasistente') {
-                statusEmoji = '🔴';
-                rowClass = 'inasistente';
-                if (codes.length > 0) {
-                    rowClass = 'inasistente-con-codigo';
-                    alertIcon = '<span class="alert-icon" title="Tiene códigos asignados">⚠️</span>';
-                }
-            } else if (tieneDuplicado) {
-                statusEmoji = '⚠️';
-                rowClass = 'duplicado';
-                alertIcon = '<span class="alert-icon" title="Código duplicado">⚠️</span>';
-            } else if (codes.length === 0) {
-                statusEmoji = '🟡';
-                rowClass = 'sin-codigo';
-                alertIcon = '<span class="alert-icon" title="Sin código">!</span>';
-            } else if (section === 'lider') {
-                statusEmoji = '🟢';
-            } else {
-                statusEmoji = '🟢';
-            }
-
-            let codesHtml;
-            if (codes.length === 0) {
-                codesHtml = '<span class="no-code">(sin código)</span>';
-            } else {
-                codesHtml = codes.map(c => {
-                    const isDup = dupIds.includes(c.ID);
-                    const cls = isDup ? 'duplicado' : '';
-                    const passStr = c.Contrasena ? `<span class="code-pass">${Utils.escapeHtml(c.Contrasena)}</span>` : '';
-                    return `<span class="code-tag ${cls}" onclick="event.stopPropagation();App.ui.showCodeMenu('${c.ID}','${a.ID}',event)">${Utils.escapeHtml(c.Codigo)}${passStr}</span>`;
-                }).join('');
-            }
-
-            const badges = a.OJT ? '<span class="badge badge-ojt">OJT</span>' : '';
-
-            return `
-                <div class="asesor-row ${rowClass}" draggable="false" data-id="${a.ID}" data-section="${section}">
-                    <span class="drag-handle">⋮⋮</span>
-                    <span class="status-chip" onclick="event.stopPropagation();App.ui.showStatusMenu('${a.ID}',event)">${status.emoji}</span>
-                    <div class="asesor-main">
-                        <span class="asesor-name" onclick="event.stopPropagation();App.ui.editNameInline('${a.ID}',this)">${Utils.escapeHtml(a.Nombre)}</span>
-                        ${badges}
-                        <span style="color:#94a3b8;margin:0 2px;">—</span>
-                        <span class="codes-inline">${codesHtml}</span>
-                    </div>
-                    <button style="border:none;background:none;font-size:0.75rem;cursor:pointer;padding:2px;" onclick="event.stopPropagation();App.ui.showRowMenu('${a.ID}',event)">⋯</button>
-                </div>
-            `;
-        },
-        historial: () => {
-            document.getElementById('cntHistorial').textContent = state.historial.length;
-            const container = document.getElementById('listHistorial');
-            if (state.historial.length === 0) {
-                container.innerHTML = '<div class="empty">Sin movimientos</div>';
-            } else {
-                container.innerHTML = state.historial.slice(0, 30).map(h => {
-                    let accionClass = h.accion === 'Transferencia' ? 'transferencia' : '';
-                    return `
-                        <div class="historial-item">
-                            <div class="historial-fecha">📅 ${Utils.escapeHtml(h.fecha)}</div>
-                            <span class="historial-accion ${accionClass}">${Utils.escapeHtml(h.accion)}</span>
-                            <div class="historial-detalle">
-                                <span class="historial-codigo">${Utils.escapeHtml(h.codigo)}</span>
-                                <span class="historial-asesor">${Utils.escapeHtml(h.de)}</span>
-                                <span class="historial-flecha">→</span>
-                                <span class="historial-asesor">${Utils.escapeHtml(h.a)}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        },
-        detectAlerts: () => {
-            state.alerts = [];
-            
-            // Detectar códigos duplicados
-            const conteo = {};
-            state.codigos.forEach(c => {
-                if (!c.Codigo || c.Codigo.trim() === '') return;
-                const key = c.Codigo.toLowerCase().trim();
-                if (!conteo[key]) conteo[key] = [];
-                conteo[key].push(c);
-            });
-            
-            Object.entries(conteo).forEach(([key, items]) => {
-                if (items.length > 1) {
-                    const nombres = items.map(c => {
-                        const a = state.asesores.find(x => x.ID === c.AsesorID);
-                        return a ? a.Nombre : 'Sin asignar';
-                    });
-                    state.alerts.push({
-                        type: 'duplicate',
-                        msg: `"${items[0].Codigo}" duplicado en: ${nombres.join(', ')}`,
-                        ids: items.map(c => c.ID),
-                        codigoIds: items.map(c => c.ID),
-                        codigo: items[0].Codigo
-                    });
-                }
-            });
-            
-            // Detectar asesores sin código (solo asistentes)
-            state.asesores.forEach(a => {
-                if (a.Estado !== 'inasistente') {
-                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-                    if (codes.length === 0) {
-                        state.alerts.push({
-                            type: 'sin-codigo',
-                            msg: `${a.Nombre} no tiene código asignado`,
-                            asesorId: a.ID,
-                            asesorNombre: a.Nombre
-                        });
-                    }
-                }
-            });
-            
-            // Detectar inasistentes con código
-            state.asesores.forEach(a => {
-                if (a.Estado === 'inasistente') {
-                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-                    if (codes.length > 0) {
-                        state.alerts.push({
-                            type: 'inasist-codigo',
-                            msg: `${a.Nombre} está inasistente pero tiene ${codes.length} código(s)`,
-                            asesorId: a.ID,
-                            asesorNombre: a.Nombre,
-                            codigoIds: codes.map(c => c.ID),
-                            codigos: codes.map(c => c.Codigo)
-                        });
-                    }
-                }
-            });
-            
-            // Actualizar barra de alertas
-            const bar = document.getElementById('alertBar');
-            const txt = document.getElementById('alertText');
-            const arrow = document.getElementById('alertArrow');
-            
-            if (state.alerts.length > 0) {
-                bar.classList.add('visible');
-                txt.textContent = state.alerts.length + ' alerta' + (state.alerts.length > 1 ? 's' : '');
-                
-                // Renderizar y mostrar panel automáticamente
-                        Render.alertsPanel();
+    
+    let pendingOps = [];
+    let isSyncing = false;
+    let editingCard = null;
+    let draggedCard = null;
+    let touchTimeout = null;
+    
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    document.addEventListener('DOMContentLoaded', init);
+    
+    async function init() {
+      loadLocal();
+      render();
+      
+      await fullSync();
+      
+      document.getElementById('loadingOverlay').classList.add('hidden');
+      
+      // Sync periódico
+      setInterval(backgroundSync, 3000);
+      
+      // Procesar operaciones pendientes
+      setInterval(processPending, 1000);
+      
+      // Online/Offline
+      window.addEventListener('online', () => processPending());
     }
-
-    alertsPanel: () => {
-        const panel = document.getElementById('alertsPanel');
-        if (!panel) return;
-            
-        if (state.alerts.length === 0) {
-            panel.innerHTML = '';
-            panel.classList.remove('visible');
-            const arrow = document.getElementById('alertArrow');
-            if (arrow) arrow.textContent = 'Ver ›';
-            return;
-        }
-            
-        const html = state.alerts.map(alert => {
-            let icon = '⚠️';
-            let className = '';
-            let action = '';
-                
-            if (alert.type === 'duplicate') {
-                icon = '🔴';
-                className = 'duplicado';
-                action = `<button class="alert-item-action" onclick="App.actions.resolverDuplicado('${Utils.escapeHtml(alert.codigo)}')">Resolver</button>`;
-            } else if (alert.type === 'sin-codigo') {
-                icon = '🟡';
-                className = 'sin-codigo';
-                action = `<button class="alert-item-action" onclick="App.ui.promptAddCode('${alert.asesorId}')">Agregar</button>`;
-            } else if (alert.type === 'inasist-codigo') {
-                icon = '🟠';
-                className = 'inasist-codigo';
-                action = `<button class="alert-item-action" onclick="App.actions.liberarCodigos('${alert.asesorId}')">Liberar</button>`;
-            }
-                
-            return `
-                <div class="alert-item ${className}">
-                    <span class="alert-item-icon">${icon}</span>
-                    <span class="alert-item-text">${Utils.escapeHtml(alert.msg)}</span>
-                    ${action}
-                </div>
-            `;
-        }).join('');
-            
-        panel.innerHTML = html;
+    
+    function loadLocal() {
+      try {
+        const saved = localStorage.getItem('gestion_state_v2');
+        if (saved) state = { ...state, ...JSON.parse(saved) };
+        
+        const pending = localStorage.getItem('gestion_pending_v2');
+        if (pending) pendingOps = JSON.parse(pending);
+      } catch (e) {
+        console.error('Error loading local:', e);
+      }
     }
-};
-
-// ===================== INTERFAZ =====================
-
-    // ===================== INTERFAZ =====================
-    const UI = {
-        toggleSection: (id) => document.getElementById(id).classList.toggle('collapsed'),
-        toggleFab: () => {
-            document.getElementById('fabMenu').classList.toggle('open');
-            document.getElementById('fabBtn').classList.toggle('open');
-        },
-        closeFab: () => {
-            document.getElementById('fabMenu').classList.remove('open');
-            document.getElementById('fabBtn').classList.remove('open');
-        },
-        toast: (msg, type = 'info') => {
-            const container = document.getElementById('toasts');
-            const toast = document.createElement('div');
-            toast.className = 'toast ' + type;
-            toast.textContent = msg;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 2500);
-        },
-        setSyncStatus: (status, text) => {
-            const dot = document.getElementById('syncDot');
-            const textEl = document.getElementById('syncText');
-            
-            if (dot) dot.className = 'sync-dot ' + status;
-            if (textEl) textEl.textContent = text;
-            
-            // Log para debug
-            console.log('Estado sync:', status, text);
-        },
-        showLoading: (show) => document.getElementById('loading').classList.toggle('visible', show),
-
-        closeAllMenus: () => {
-            document.querySelectorAll('.context-menu').forEach(m => m.remove());
-            document.getElementById('menuOverlay').classList.remove('visible');
-        },
-
-        showContextMenu: (html, x, y) => {
-            UI.closeAllMenus();
-            const menu = document.createElement('div');
-            menu.className = 'context-menu';
-            menu.innerHTML = html;
-            document.body.appendChild(menu);
-
-            const rect = menu.getBoundingClientRect();
-            const maxX = window.innerWidth - rect.width - 10;
-            const maxY = window.innerHeight - rect.height - 10;
-            menu.style.left = Math.min(x, maxX) + 'px';
-            menu.style.top = Math.min(y, maxY) + 'px';
-
-            document.getElementById('menuOverlay').classList.add('visible');
-            return menu;
-        },
-
-        showStatusMenu: (asesorId, event) => {
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (!a) return;
-            const estados = [
-                { value: 'asistente', emoji: '✅', label: 'Asistente' },
-                { value: 'inasistente', emoji: '❌', label: 'Inasistente' },
-                { value: 'sin-codigo', emoji: '⚠️', label: 'Sin código' }
-            ];
-            const html = estados.map(e => `
-                <div class="context-menu-item ${a.Estado === e.value ? 'selected' : ''}" onclick="App.actions.setStatus('${asesorId}','${e.value}')">${e.emoji} ${e.label}</div>
-            `).join('');
-            UI.showContextMenu(html, event.clientX, event.clientY);
-        },
-
-        showCodeMenu: (codigoId, asesorId, event) => {
-            const codigo = state.codigos.find(c => c.ID === codigoId);
-            if (!codigo) return;
-
-            const otros = state.asesores.filter(a => a.ID !== asesorId && a.Estado !== 'inasistente');
-            const transferHtml = otros.slice(0, 10).map(a => {
-                const icon = a.Rol === 'lider' ? '👑' : '✅';
-                return `<div class="context-menu-item" onclick="App.actions.transferCode('${codigoId}','${a.ID}')">${icon} ${Utils.escapeHtml(a.Nombre)}</div>`;
-            }).join('');
-
-            const html = `
-                <div class="context-menu-header">Editar clave</div>
-                <input class="context-menu-input" type="text" value="${Utils.escapeHtml(codigo.Contrasena || '')}" placeholder="Clave" onchange="App.actions.updateCodePass('${codigoId}',this.value)">
-                <div class="context-menu-header">Transferir a</div>
-                ${transferHtml || '<div class="context-menu-item" style="color:var(--text-muted)">No hay otros asesores</div>'}
-                <div class="context-menu-item" style="color:var(--danger);border-top:1px solid var(--border);" onclick="App.actions.deleteCode('${codigoId}')">🗑️ Eliminar código</div>
-            `;
-            UI.showContextMenu(html, event.clientX, event.clientY);
-        },
-
-        showRowMenu: (asesorId, event) => {
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (!a) return;
-
-            const html = `
-                <div class="context-menu-item" onclick="App.ui.toggleOJT('${asesorId}')">${a.OJT ? '✓ ' : ''}OJT</div>
-                <div class="context-menu-item" onclick="App.ui.promptAddCode('${asesorId}')">➕ Agregar código</div>
-                <div class="context-menu-item" onclick="App.actions.moveToLider('${asesorId}')">👑 Mover a Líderes</div>
-                <div class="context-menu-item" onclick="App.actions.moveToAsesor('${asesorId}')">👥 Mover a Asesores</div>
-                <div class="context-menu-item" style="color:var(--danger)" onclick="App.actions.confirmDelete('${asesorId}')">🗑️ Eliminar asesor</div>
-            `;
-            UI.showContextMenu(html, event.clientX, event.clientY);
-        },
-
-        editNameInline: (asesorId, element) => {
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (!a) return;
-
-            element.contentEditable = true;
-            element.classList.add('editing');
-            element.focus();
-
-            const range = document.createRange();
-            range.selectNodeContents(element);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-
-            const save = () => {
-                element.contentEditable = false;
-                element.classList.remove('editing');
-                const newName = element.textContent.trim();
-                if (newName && newName !== a.Nombre) {
-                    CRUD.updateAsesor(asesorId, { Nombre: newName });
-                    UI.toast('Nombre actualizado', 'success');
-                } else {
-                    element.textContent = a.Nombre;
-                }
-            };
-
-            element.onblur = save;
-            element.onkeydown = (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); element.blur(); }
-                if (e.key === 'Escape') { element.textContent = a.Nombre; element.blur(); }
-            };
-        },
-
-        toggleOJT: (asesorId) => {
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (a) {
-                CRUD.updateAsesor(asesorId, { OJT: !a.OJT });
-                UI.toast(a.OJT ? 'OJT desactivado' : 'OJT activado', 'success');
-            }
-            UI.closeAllMenus();
-        },
-
-        promptAddCode: (asesorId) => {
-            UI.closeAllMenus();
-            const codigo = prompt('Código:');
-            if (codigo && codigo.trim()) {
-                const clave = prompt('Clave (opcional):');
-                const resultado = CRUD.addCodigo(asesorId, codigo.trim(), clave ? clave.trim() : '');
-                if (resultado) {
-                    UI.toast('Código agregado', 'success');
-                }
-            }
-        },
-
-        showAddForm: () => {
-            UI.closeFab();
-            const form = document.getElementById('addForm');
-            form.classList.add('visible');
-            document.getElementById('addNombre').focus();
-        },
-
-        hideAddForm: () => {
-            const form = document.getElementById('addForm');
-            form.classList.remove('visible');
-            document.getElementById('addNombre').value = '';
-            document.getElementById('addCodigo').value = '';
-            document.getElementById('addClave').value = '';
-        },
-
-        toggleAlertsPanel: () => {
-            const panel = document.getElementById('alertsPanel');
-            const arrow = document.getElementById('alertArrow');
-            
-            if (panel.classList.contains('visible')) {
-                panel.classList.remove('visible');
-                arrow.textContent = 'Ver ›';
-            } else {
-                panel.classList.add('visible');
-                arrow.textContent = 'Ocultar ▼';
-            }
-        },
-
-        showAlertsIfNeeded: () => {
-            if (state.alerts.length > 0) {
-                const panel = document.getElementById('alertsPanel');
-                const arrow = document.getElementById('alertArrow');
-                panel.classList.add('visible');
-                arrow.textContent = 'Ocultar ▼';
-            }
-        },
-
-        showConfirm: (title, message, onConfirm, danger = false) => {
-            const modal = document.getElementById('confirmModal');
-            const titleEl = document.getElementById('confirmTitle');
-            const messageEl = document.getElementById('confirmMessage');
-            const okBtn = document.getElementById('confirmOk');
-            const cancelBtn = document.getElementById('confirmCancel');
-            
-            titleEl.textContent = title;
-            messageEl.innerHTML = message;
-            
-            okBtn.className = 'confirm-btn ' + (danger ? 'danger' : 'primary');
-            
-            const hide = () => {
-                modal.classList.remove('visible');
-                okBtn.onclick = null;
-                cancelBtn.onclick = null;
-            };
-            
-            okBtn.onclick = () => {
-                hide();
-                if (onConfirm) onConfirm();
-            };
-            
-            cancelBtn.onclick = hide;
-            
-            modal.classList.add('visible');
-        },
-
-        showAlerts: () => {
-            UI.toggleAlertsPanel();
-        },
-
-        updateUndoButton: () => {
-            const btn = document.getElementById('undoBtn');
-            if (state.undoStack && state.undoStack.length > 0) {
-                btn.style.display = 'flex';
-            } else {
-                btn.style.display = 'none';
-            }
-        }
-    };
-
-    // ===================== ACCIONES =====================
-    const Actions = {
-        setStatus: (asesorId, estado) => {
-            CRUD.updateAsesor(asesorId, { Estado: estado });
-            UI.closeAllMenus();
-            UI.toast('Estado actualizado', 'success');
-        },
-
-        transferCode: (codigoId, toId) => {
-            const codigo = state.codigos.find(c => c.ID === codigoId);
-            const asesorOrigen = state.asesores.find(a => a.ID === codigo.AsesorID);
-            const asesorDestino = state.asesores.find(a => a.ID === toId);
-            
-            if (!codigo || !asesorDestino) return;
-            
-            const nombreOrigen = asesorOrigen ? asesorOrigen.Nombre : 'Sin asignar';
-            const nombreDestino = asesorDestino.Nombre;
-            
-            UI.showConfirm(
-                'Transferir código',
-                `El código <strong>${Utils.escapeHtml(codigo.Codigo)}</strong> pasará de <strong>${Utils.escapeHtml(nombreOrigen)}</strong> a <strong>${Utils.escapeHtml(nombreDestino)}</strong>.<br><br>¿Confirmar?`,
-                () => {
-                    // Guardar para deshacer
-                    state.undoStack.push({
-                        type: 'transfer',
-                        codigoId: codigoId,
-                        fromId: codigo.AsesorID,
-                        toId: toId,
-                        timestamp: Date.now()
-                    });
-                    if (state.undoStack.length > 10) state.undoStack.shift();
-                    
-                    CRUD.transferCodigo(codigoId, toId);
-                    UI.closeAllMenus();
-                    UI.toast('Código transferido', 'success');
-                    UI.updateUndoButton();
-                }
-            );
-        },
-
-        updateCodePass: (codigoId, pass) => {
-            CRUD.updateCodigo(codigoId, { Contrasena: pass });
-            UI.closeAllMenus();
-            UI.toast('Clave actualizada', 'success');
-        },
-
-        deleteCode: (codigoId) => {
-            const codigo = state.codigos.find(c => c.ID === codigoId);
-            if (!codigo) return;
-            
-            UI.showConfirm(
-                'Eliminar código',
-                `¿Eliminar el código <strong>${Utils.escapeHtml(codigo.Codigo)}</strong>?<br><br>Esta acción no se puede deshacer.`,
-                () => {
-                    const idx = state.codigos.findIndex(c => c.ID === codigoId);
-                    if (idx !== -1) {
-                        state.codigos.splice(idx, 1);
-                        Storage.saveState();
-                        Sync.enqueue('deleteCodigo', { ID: codigoId });
-                        Render.all();
-                        UI.toast('Código eliminado', 'success');
-                    }
-                },
-                true
-            );
-            UI.closeAllMenus();
-        },
-
-        moveToLider: (asesorId) => {
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (!a) return;
-            
-            // Calcular nueva posición al final de líderes
-            const lideres = state.asesores.filter(x => x.Rol === 'lider' && x.Estado !== 'inasistente');
-            const maxPos = lideres.reduce((max, x) => Math.max(max, x.Posicion || 0), 0);
-            
-            a.Rol = 'lider';
-            a.Estado = 'asistente';
-            a.Posicion = maxPos + 1;
-            
-            Storage.saveState();
-            Sync.enqueue('updateAsesor', { ID: asesorId, Rol: 'lider', Estado: 'asistente', Posicion: a.Posicion });
-            Render.all();
-            
-            UI.closeAllMenus();
-            UI.toast('Movido a Líderes', 'success');
-        },
-
-        moveToAsesor: (asesorId) => {
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (!a) return;
-            
-            // Calcular nueva posición al final de asesores
-            const asesores = state.asesores.filter(x => x.Rol !== 'lider' && x.Estado !== 'inasistente');
-            const maxPos = asesores.reduce((max, x) => Math.max(max, x.Posicion || 0), 0);
-            
-            a.Rol = 'asesor';
-            a.Estado = 'asistente';
-            a.Posicion = maxPos + 1;
-            
-            Storage.saveState();
-            Sync.enqueue('updateAsesor', { ID: asesorId, Rol: 'asesor', Estado: 'asistente', Posicion: a.Posicion });
-            Render.all();
-            
-            UI.closeAllMenus();
-            UI.toast('Movido a Asesores', 'success');
-        },
-
-        confirmDelete: (asesorId) => {
-            UI.closeAllMenus();
-            const a = state.asesores.find(x => x.ID === asesorId);
-            if (!a) return;
-            const codes = state.codigos.filter(c => c.AsesorID === asesorId);
-            let msg = `¿Eliminar a ${a.Nombre}?`;
-            if (codes.length > 0) {
-                msg += `\n\nSus ${codes.length} código(s) quedarán sin asignar.`;
-            }
-            if (confirm(msg)) {
-                CRUD.deleteAsesor(asesorId);
-                UI.toast('Asesor eliminado', 'success');
-            }
-        },
-
-        quickAddAsesor: () => {
-            const nombre = document.getElementById('addNombre').value.trim();
-            const codigo = document.getElementById('addCodigo').value.trim();
-            const clave = document.getElementById('addClave').value.trim();
-
-            if (!nombre) {
-                UI.toast('Ingresa un nombre', 'warning');
-                return;
-            }
-
-            CRUD.addAsesor({ nombre, codigo, clave, rol: 'asesor', estado: 'asistente' });
-            UI.hideAddForm();
-            UI.toast('Asesor agregado', 'success');
-        },
-
-        copyFormat: () => {
-            let txt = state.config.Equipo + ' – ' + Utils.getCurrentDate() + '\n\n';
-
-            const inasist = state.asesores.filter(a => a.Estado === 'inasistente');
-            if (inasist.length > 0) {
-                txt += 'Inasistencias:\n\n';
-                inasist.forEach(a => {
-                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-                    const cStr = codes.length > 0 ? codes.map(c => c.Codigo).join(' y ') : 'sin código';
-                    const ojt = a.OJT ? ' OJT' : '';
-                    txt += a.Nombre + ojt + ' — ' + cStr + ' ❌\n';
-                });
-                txt += '\n';
-            }
-
-            txt += 'Asistentes:\n\n';
-
-            const lideres = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
-            lideres.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-            if (lideres.length > 0) {
-                txt += 'Líderes:\n\n';
-                lideres.forEach(a => {
-                    txt += a.Nombre + ' ✅\n';
-                    state.codigos.filter(c => c.AsesorID === a.ID).forEach(c => { txt += c.Codigo + '\n'; });
-                    txt += '\n';
-                });
-            }
-
-            const asesores = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
-            asesores.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-            if (asesores.length > 0) {
-                txt += 'Asesores:\n\n';
-                asesores.forEach(a => {
-                    const codes = state.codigos.filter(c => c.AsesorID === a.ID);
-                    let cStr = codes.length === 0 ? 'sin código' : codes.map(c => {
-                        let s = c.Codigo;
-                        if (c.Contrasena) s += ' (clave: ' + c.Contrasena + ')';
-                        return s;
-                    }).join(' y ');
-                    const ojt = a.OJT ? ' OJT' : '';
-                    const emoji = a.Estado === 'sin-codigo' ? '⚠️' : '✅';
-                    txt += a.Nombre + ojt + ' — ' + cStr + ' ' + emoji + '\n';
-                });
-            }
-
-            if (navigator.clipboard?.writeText) {
-                navigator.clipboard.writeText(txt).then(() => UI.toast('Formato copiado', 'success')).catch(() => Actions.fallbackCopy(txt));
-            } else Actions.fallbackCopy(txt);
-            UI.closeFab();
-        },
-
-        fallbackCopy: (txt) => {
-            const ta = document.createElement('textarea');
-            ta.value = txt;
-            ta.style.cssText = 'position:fixed;left:-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            try { document.execCommand('copy'); UI.toast('Copiado', 'success'); }
-            catch (e) { UI.toast('Error al copiar', 'error'); }
-            document.body.removeChild(ta);
-        },
-
-        resolverDuplicado: (codigo) => {
-            UI.closeAllMenus();
-            const codigoNorm = codigo.toLowerCase().trim();
-            const duplicados = state.codigos.filter(c => c.Codigo.toLowerCase().trim() === codigoNorm);
-            
-            if (duplicados.length < 2) {
-                UI.toast('No hay duplicados', 'info');
-                return;
-            }
-            
-            let msg = `Se encontraron ${duplicados.length} instancias del código "${codigo}":\n\n`;
-            duplicados.forEach((c, idx) => {
-                const asesor = state.asesores.find(a => a.ID === c.AsesorID);
-                msg += `${idx + 1}. ${asesor ? asesor.Nombre : 'Sin asignar'}\n`;
-            });
-            msg += '\nElimina manualmente los códigos duplicados haciendo clic en cada código.';
-            
-            alert(msg);
-        },
-
-        liberarCodigos: (asesorId) => {
-            const asesor = state.asesores.find(a => a.ID === asesorId);
-            if (!asesor) return;
-            
-            const codes = state.codigos.filter(c => c.AsesorID === asesorId);
-            if (codes.length === 0) return;
-            
-            UI.showConfirm(
-                'Liberar códigos',
-                `¿Desasignar ${codes.length} código(s) de <strong>${Utils.escapeHtml(asesor.Nombre)}</strong>?<br><br>Los códigos quedarán sin asignar.`,
-                () => {
-                    codes.forEach(c => {
-                        CRUD.updateCodigo(c.ID, { AsesorID: '' });
-                    });
-                    UI.toast(`${codes.length} código(s) liberado(s)`, 'success');
-                }
-            );
-        },
-
-        undo: () => {
-            if (!state.undoStack || state.undoStack.length === 0) {
-                UI.toast('No hay cambios para deshacer', 'info');
-                return;
-            }
-            
-            const lastAction = state.undoStack.pop();
-            
-            if (lastAction.type === 'transfer') {
-                CRUD.updateCodigo(lastAction.codigoId, { AsesorID: lastAction.fromId });
-                UI.toast('Transferencia deshecha', 'success');
-            }
-            
-            UI.updateUndoButton();
-        },
-
-        exportBackup: () => {
-            const data = {
-                asesores: state.asesores,
-                codigos: state.codigos,
-                config: state.config,
-                historial: state.historial,
-                exportDate: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'backup_' + new Date().toISOString().split('T')[0] + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            UI.toast('Backup descargado', 'success');
-            UI.closeFab();
-        }
-    };
-
-    // ===================== DRAG & DROP ENTRE SECCIONES =====================
-    let draggedElement = null;
-    let draggedId = null;
-    let draggedSection = null;
-    let canDrag = false;
-
-    const setupDragDrop = () => {
-        // Detectar si el click fue en el handle
-        document.addEventListener('mousedown', (e) => {
-            const handle = e.target.closest('.drag-handle');
-            if (handle) {
-                canDrag = true;
-                const row = handle.closest('.asesor-row');
-                if (row) {
-                    row.setAttribute('draggable', 'true');
-                }
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            canDrag = false;
-            document.querySelectorAll('.asesor-row').forEach(row => {
-                row.setAttribute('draggable', 'false');
-            });
-        });
-
-        // INICIO DEL ARRASTRE
-        document.addEventListener('dragstart', (e) => {
-            const row = e.target.closest('.asesor-row');
-            
-            if (!row || !canDrag) {
-                e.preventDefault();
-                return;
-            }
-            
-            draggedElement = row;
-            draggedId = row.dataset.id;
-            draggedSection = row.dataset.section;
-            
-            row.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', draggedId);
-            
-            setTimeout(() => {
-                document.querySelectorAll('.section-body').forEach(sb => {
-                    const section = sb.closest('.section');
-                    if (section) {
-                        if (section.id === 'secInasist') {
-                            sb.classList.add('drag-target-inasist');
-                        } else if (section.id === 'secLideres') {
-                            sb.classList.add('drag-target-lider');
-                        } else {
-                            sb.classList.add('drag-target');
-                        }
-                    }
-                });
-            }, 10);
-        });
-
-        // FIN DEL ARRASTRE
-        document.addEventListener('dragend', () => {
-            canDrag = false;
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
-                draggedElement.setAttribute('draggable', 'false');
-            }
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
-                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
-            });
-            document.querySelectorAll('.asesor-row').forEach(row => {
-                row.setAttribute('draggable', 'false');
-            });
-            draggedElement = null;
-            draggedId = null;
-            draggedSection = null;
-        });
-
-        // MIENTRAS SE ARRASTRA
-        document.addEventListener('dragover', (e) => {
-            if (!draggedId) return;
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            
-            const row = e.target.closest('.asesor-row');
-            
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            
-            if (row && row.dataset.id !== draggedId) {
-                row.classList.add('drag-over');
-            }
-        });
-
-        // SALIR DEL ÁREA
-        document.addEventListener('dragleave', (e) => {
-            const row = e.target.closest('.asesor-row');
-            if (row && !row.contains(e.relatedTarget)) {
-                row.classList.remove('drag-over');
-            }
-        });
-
-        // SOLTAR
-        document.addEventListener('drop', (e) => {
-            e.preventDefault();
-            
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            document.querySelectorAll('.drag-target, .drag-target-inasist, .drag-target-lider').forEach(el => {
-                el.classList.remove('drag-target', 'drag-target-inasist', 'drag-target-lider');
-            });
-            
-            if (!draggedId) return;
-            
-            const targetRow = e.target.closest('.asesor-row');
-            const sectionBody = e.target.closest('.section-body');
-            
-            if (targetRow && targetRow.dataset.id !== draggedId) {
-                // Soltar sobre otra fila
-                const targetId = targetRow.dataset.id;
-                const targetSection = targetRow.dataset.section;
-                handleMove(draggedId, targetId, draggedSection, targetSection);
-            } else if (sectionBody && !targetRow) {
-                // Soltar en área vacía de una sección
-                const section = sectionBody.closest('.section');
-                if (section) {
-                    let targetSection = 'asesor';
-                    if (section.id === 'secInasist') targetSection = 'inasist';
-                    else if (section.id === 'secLideres') targetSection = 'lider';
-                    
-                    if (draggedSection !== targetSection) {
-                        handleDropOnSection(draggedId, draggedSection, targetSection);
-                    }
-                }
-            }
-        });
-    };
-
-    const handleDropOnSection = (fromId, fromSection, toSection) => {
-        const fromAsesor = state.asesores.find(a => a.ID === fromId);
-        if (!fromAsesor) return;
-        
-        pendingOps.mover = Date.now();
-        
-        // Cambiar rol/estado según la sección destino
-        if (toSection === 'lider') {
-            fromAsesor.Rol = 'lider';
-            fromAsesor.Estado = 'asistente';
-        } else if (toSection === 'inasist') {
-            fromAsesor.Estado = 'inasistente';
-        } else {
-            fromAsesor.Rol = 'asesor';
-            fromAsesor.Estado = 'asistente';
-        }
-        
-        // Calcular nueva posición al final de la sección
-        let lista;
-        if (toSection === 'lider') {
-            lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente' && a.ID !== fromId);
-        } else if (toSection === 'inasist') {
-            lista = state.asesores.filter(a => a.Estado === 'inasistente' && a.ID !== fromId);
-        } else {
-            lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente' && a.ID !== fromId);
-        }
-        
-        const maxPos = lista.reduce((max, a) => Math.max(max, a.Posicion || 0), 0);
-        fromAsesor.Posicion = maxPos + 1;
-        
-        Storage.saveState();
-        Render.all();
-        
-        // Sincronizar con servidor
-        Sync.enqueue('updateAsesor', {
-            ID: fromId,
-            Rol: fromAsesor.Rol,
-            Estado: fromAsesor.Estado,
-            Posicion: fromAsesor.Posicion
-        });
-        
-        setTimeout(() => {
-            pendingOps.mover = false;
-        }, GRACE_TIME);
-        
-        UI.toast('Movido a ' + (toSection === 'lider' ? 'Líderes' : toSection === 'inasist' ? 'Inasistencias' : 'Asesores'), 'success');
-    };
-
-    const handleMove = (fromId, toId, fromSection, toSection) => {
-        const fromAsesor = state.asesores.find(a => a.ID === fromId);
-        const toAsesor = state.asesores.find(a => a.ID === toId);
-        
-        if (!fromAsesor || !toAsesor) return;
-        
-        pendingOps.mover = Date.now();
-        
-        const cambiaSeccion = fromSection !== toSection;
-        
-        // Si cambia de sección, actualizar rol/estado
-        if (cambiaSeccion) {
-            if (toSection === 'lider') {
-                fromAsesor.Rol = 'lider';
-                fromAsesor.Estado = 'asistente';
-            } else if (toSection === 'inasist') {
-                fromAsesor.Estado = 'inasistente';
-            } else {
-                fromAsesor.Rol = 'asesor';
-                fromAsesor.Estado = 'asistente';
-            }
-        }
-        
-        // Obtener lista de la sección destino
-        let lista;
-        if (toSection === 'lider') {
-            lista = state.asesores.filter(a => a.Rol === 'lider' && a.Estado !== 'inasistente');
-        } else if (toSection === 'inasist') {
-            lista = state.asesores.filter(a => a.Estado === 'inasistente');
-        } else {
-            lista = state.asesores.filter(a => a.Rol !== 'lider' && a.Estado !== 'inasistente');
-        }
-        
-        lista.sort((a, b) => (a.Posicion || 999) - (b.Posicion || 999));
-        
-        // Remover el elemento arrastrado si está en la lista
-        const fromIdx = lista.findIndex(a => a.ID === fromId);
-        if (fromIdx !== -1) {
-            lista.splice(fromIdx, 1);
-        }
-        
-        // Encontrar posición del target
-        const toIdx = lista.findIndex(a => a.ID === toId);
-        if (toIdx === -1) {
-            // Si no encuentra el target, agregar al final
-            lista.push(fromAsesor);
-        } else {
-            // Insertar antes del target
-            lista.splice(toIdx, 0, fromAsesor);
-        }
-        
-        // Reasignar posiciones
-        const ordenNuevo = [];
-        lista.forEach((asesor, index) => {
-            const nuevaPos = index + 1;
-            const stateIdx = state.asesores.findIndex(a => a.ID === asesor.ID);
-            if (stateIdx !== -1) {
-                state.asesores[stateIdx].Posicion = nuevaPos;
-            }
-            ordenNuevo.push({ ID: asesor.ID, posicion: nuevaPos });
-        });
-        
-        Storage.saveState();
-        Render.all();
-        
-        // Sincronizar
-        if (cambiaSeccion) {
-            Sync.enqueue('updateAsesor', {
-                ID: fromId,
-                Rol: fromAsesor.Rol,
-                Estado: fromAsesor.Estado
-            });
-        }
-        
-        Sync.enqueue('reorderAsesores', { orden: ordenNuevo });
-        
-        setTimeout(() => {
-            pendingOps.mover = false;
-        }, GRACE_TIME);
-        
-        UI.toast('Posición actualizada', 'success');
-    };
-
-    // ===================== INICIALIZACIÓN =====================
-    const init = () => {
-        // Cargar estado y cola desde localStorage
-        const cargado = Storage.loadState();
-        Storage.loadQueue();
-
-        // SIEMPRE mostrar datos locales primero
-        if (cargado && state.asesores.length > 0) {
-            console.log('Cargando datos locales:', state.asesores.length, 'asesores');
-            Render.all();
-            UI.showLoading(false);
-            UI.setSyncStatus('synced', 'Datos locales');
-        } else {
-            console.log('No hay datos locales');
-            UI.showLoading(true);
-        }
-
-        // Event listeners
-        document.getElementById('searchInput').addEventListener('input', Utils.debounce(Render.asesores, 150));
-
-        document.addEventListener('click', (e) => {
-            const fab = document.getElementById('fabBtn');
-            const menu = document.getElementById('fabMenu');
-            if (!fab.contains(e.target) && !menu.contains(e.target)) UI.closeFab();
-        });
-
-        document.getElementById('addNombre').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') Actions.quickAddAsesor();
-            if (e.key === 'Escape') UI.hideAddForm();
-        });
-
-        // Setup drag & drop
-        setupDragDrop();
-
-        window.addEventListener('online', () => {
-            state.isOnline = true;
-            document.getElementById('offlineBanner').classList.remove('visible');
-            UI.toast('Conexión restaurada', 'success');
-            setTimeout(() => Sync.forceSync(), 500);
-        });
-
-        window.addEventListener('offline', () => {
-            state.isOnline = false;
-            document.getElementById('offlineBanner').classList.add('visible');
-            UI.setSyncStatus('offline', 'Sin conexión');
-        });
-
-        Sync.updateQueueIndicator();
-
-        // Sincronizar en segundo plano después de 2 segundos
-        if (state.isOnline) {
-            setTimeout(() => {
-                console.log('Iniciando sincronización...');
-                Sync.forceSync().then(() => {
-                    console.log('Sincronización completada');
-                }).catch(err => {
-                    console.error('Error en sincronización:', err);
-                }).finally(() => {
-                    UI.showLoading(false);
-                });
-            }, 2000);
-        } else {
-            UI.showLoading(false);
-        }
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
+    
+    function saveLocal() {
+      try {
+        localStorage.setItem('gestion_state_v2', JSON.stringify(state));
+        localStorage.setItem('gestion_pending_v2', JSON.stringify(pendingOps));
+      } catch (e) {
+        console.error('Error saving local:', e);
+      }
     }
-
-    return {
-        state,
-        ui: UI,
-        actions: Actions,
-        sync: Sync,
-        crud: CRUD,
-        utils: Utils,
-        storage: Storage
-    };
-})();
-</script>
+    
+    // ============================================
+    // SINCRONIZACIÓN
+    // ============================================
+    async function fullSync() {
+      setSyncStatus('syncing');
+      
+      try {
+        const response = await fetchWithTimeout(`${API}?action=full`, {}, 15000);
+        const data = await response.json();
+        
+        if (data.error) throw new Error(data.error);
+        
+        // Mapear IDs temporales a IDs reales
+        const tempToReal = {};
+        
+        state.asesores.forEach(local => {
+          if (local.id.startsWith('temp_')) {
+            const match = data.data.find(d => 
+              d.nombre === local.nombre && 
+              Math.abs(d.timestamp - local.timestamp) < 60000
+            );
+            if (match) {
+              tempToReal[local.id] = match.id;
+            }
+          }
+        });
+        
+        // Actualizar operaciones pendientes con IDs reales
+        pendingOps = pendingOps.map(op => {
+          if (op.tempId && tempToReal[op.tempId]) {
+            op.id = tempToReal[op.tempId];
+            delete op.tempId;
+          }
+          if (op.id && tempToReal[op.id]) {
+            op.id = tempToReal[op.id];
+          }
+          return op;
+        }).filter(op => op.action !== 'add' || !tempToReal[op.tempId]);
+        
+        state.asesores = data.data || [];
+        state.config = data.config || state.config;
+        state.lastUpdate = data.lastUpdate || Date.now();
+        
+        saveLocal();
+        render();
+        setSyncStatus('ok');
+        
+        return true;
+      } catch (error) {
+        console.error('Full sync error:', error);
+        setSyncStatus('error');
+        return false;
+      }
+    }
+    
+    async function backgroundSync() {
+      if (isSyncing || !navigator.onLine) return;
+      
+      try {
+        const response = await fetchWithTimeout(
+          `${API}?action=sync&last=${state.lastUpdate}`, 
+          {}, 
+          10000
+        );
+        const data = await response.json();
+        
+        if (data.hasChanges) {
+          state.asesores = data.data || state.asesores;
+          state.config = data.config || state.config;
+          state.lastUpdate = data.lastUpdate;
+          saveLocal();
+          render();
+        }
+        
+        setSyncStatus('ok');
+      } catch (error) {
+        console.error('Background sync error:', error);
+      }
+    }
+    
+    async function forceSync() {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('spinning');
+      
+      await processPending();
+      await fullSync();
+      
+      btn.classList.remove('spinning');
+      showToast('Sincronizado correctamente');
+    }
+    
+    function setSyncStatus(status) {
+      const indicator = document.getElementById('syncIndicator');
+      indicator.className = 'sync-indicator';
+      if (status === 'syncing') indicator.classList.add('syncing');
+      if (status === 'error') indicator.classList.add('error');
+    }
+    
+    async function fetchWithTimeout(url, options = {}, timeout = 10000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      
+      clearTimeout(id);
+      return response;
+    }
+    
+    // ============================================
+    // OPERACIONES PENDIENTES
+    // ============================================
+    function addPendingOp(op) {
+      pendingOps.push({ ...op, timestamp: Date.now() });
+      saveLocal();
+      processPending();
+    }
+    
+    async function processPending() {
+      if (isSyncing || pendingOps.length === 0 || !navigator.onLine) return;
+      
+      isSyncing = true;
+      setSyncStatus('syncing');
+      
+      const toProcess = [...pendingOps];
+      
+      for (const op of toProcess) {
+        try {
+          const response = await fetchWithTimeout(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(op)
+          }, 15000);
+          
+          const result = await response.json();
+          
+          if (result.status === 'error') {
+            console.error('Op error:', result.message);
+            showToast('Error: ' + result.message, 'error');
+          } else {
+            // Operación exitosa - remover de pendientes
+            const idx = pendingOps.findIndex(p => p.timestamp === op.timestamp);
+            if (idx > -1) pendingOps.splice(idx, 1);
+            
+            // Si es add, actualizar ID temporal con ID real
+            if (op.action === 'add' && result.id && op.tempId) {
+              const localIdx = state.asesores.findIndex(a => a.id === op.tempId);
+              if (localIdx > -1) {
+                state.asesores[localIdx].id = result.id;
+              }
+            }
+          }
+          
+          saveLocal();
+          
+        } catch (error) {
+          console.error('Process pending error:', error);
+          break;
+        }
+      }
+      
+      isSyncing = false;
+      setSyncStatus(pendingOps.length > 0 ? 'error' : 'ok');
+    }
+    
+    // ============================================
+    // CRUD LOCAL + SYNC
+    // ============================================
+    function createNewAsesor() {
+      const tempId = 'temp_' + Date.now();
+      
+      const newAsesor = {
+        id: tempId,
+        timestamp: Date.now(),
+        nombre: '',
+        codigos: '',
+        estado: 'asistente',
+        tipo: 'asesor',
+        orden: state.asesores.length + 1,
+        observaciones: '',
+        prestadoDe: '',
+        prestadoA: '',
+        isNew: true
+      };
+      
+      state.asesores.push(newAsesor);
+      saveLocal();
+      render();
+      
+      // Enfocar el input de nombre
+      setTimeout(() => {
+        const input = document.querySelector(`[data-id="${tempId}"] .asesor-name-input`);
+        if (input) {
+          input.focus();
+          startEditing(tempId);
+        }
+      }, 100);
+    }
+    
+    function saveAsesor(id) {
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (!card) return;
+      
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor) return;
+      
+      const nameInput = card.querySelector('.asesor-name-input');
+      const codigoInput = card.querySelector('.codigo-input');
+      const obsInput = card.querySelector('.observaciones-input');
+      
+      const updates = {
+        nombre: nameInput ? nameInput.value.trim() : asesor.nombre,
+        codigos: codigoInput ? codigoInput.value.trim() : asesor.codigos,
+        observaciones: obsInput ? obsInput.value.trim() : asesor.observaciones
+      };
+      
+      // Validar nombre
+      if (!updates.nombre) {
+        showToast('El nombre es requerido', 'error');
+        nameInput?.focus();
+        return;
+      }
+      
+      // Actualizar estado local
+      Object.assign(asesor, updates);
+      delete asesor.isNew;
+      
+      saveLocal();
+      
+      // Encolar operación
+      if (id.startsWith('temp_')) {
+        addPendingOp({
+          action: 'add',
+          tempId: id,
+          ...updates,
+          tipo: asesor.tipo,
+          estado: asesor.estado
+        });
+      } else {
+        addPendingOp({
+          action: 'update',
+          id: id,
+          ...updates
+        });
+      }
+      
+      stopEditing();
+      render();
+      showToast('Guardado correctamente');
+    }
+    
+    function updateAsesorField(id, field, value) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor) return;
+      
+      asesor[field] = value;
+      saveLocal();
+      
+      if (!id.startsWith('temp_')) {
+        addPendingOp({
+          action: 'update',
+          id: id,
+          [field]: value
+        });
+      }
+    }
+    
+    function toggleEstado(id) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor) return;
+      
+      const estados = ['asistente', 'inasistente', 'sin-codigo'];
+      const currentIdx = estados.indexOf(asesor.estado);
+      const newEstado = estados[(currentIdx + 1) % estados.length];
+      
+      asesor.estado = newEstado;
+      saveLocal();
+      render();
+      
+      if (!id.startsWith('temp_')) {
+        addPendingOp({
+          action: 'update',
+          id: id,
+          estado: newEstado
+        });
+      }
+      
+      showToast(`Estado: ${getEstadoText(newEstado)}`);
+    }
+    
+    function setTipo(id, tipo) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor) return;
+      
+      asesor.tipo = tipo;
+      saveLocal();
+      
+      if (!id.startsWith('temp_')) {
+        addPendingOp({
+          action: 'update',
+          id: id,
+          tipo: tipo
+        });
+      }
+    }
+    
+    function deleteAsesor(id) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor) return;
+      
+      // Mostrar confirmación inline
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (!card) return;
+      
+      const confirm = document.createElement('div');
+      confirm.className = 'delete-confirm';
+      confirm.innerHTML = `
+        <span style="color:white;font-weight:600;">¿Eliminar?</span>
+        <button class="delete-confirm-btn yes" onclick="confirmDelete('${id}')">Sí</button>
+        <button class="delete-confirm-btn no" onclick="cancelDelete('${id}')">No</button>
+      `;
+      card.appendChild(confirm);
+    }
+    
+    function confirmDelete(id) {
+      state.asesores = state.asesores.filter(a => a.id !== id);
+      saveLocal();
+      render();
+      
+      if (!id.startsWith('temp_')) {
+        addPendingOp({ action: 'delete', id: id });
+      }
+      
+      showToast('Eliminado');
+    }
+    
+    function cancelDelete(id) {
+      const confirm = document.querySelector(`[data-id="${id}"] .delete-confirm`);
+      if (confirm) confirm.remove();
+    }
+    
+    function saveConfig(clave, valor) {
+      state.config[clave] = valor;
+      saveLocal();
+      
+      addPendingOp({
+        action: 'updateConfig',
+        clave: clave,
+        valor: valor
+      });
+    }
+    
+    // ============================================
+    // EDICIÓN INLINE
+    // ============================================
+    function startEditing(id) {
+      if (editingCard && editingCard !== id) {
+        stopEditing();
+      }
+      
+      editingCard = id;
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (card) card.classList.add('editing');
+    }
+    
+    function stopEditing() {
+      if (editingCard) {
+        const card = document.querySelector(`[data-id="${editingCard}"]`);
+        if (card) card.classList.remove('editing');
+      }
+      editingCard = null;
+    }
+    
+    // ============================================
+    // DRAG & DROP
+    // ============================================
+    function setupDragAndDrop() {
+      // Drop zones
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', handleZoneDragOver);
+        zone.addEventListener('dragleave', handleZoneDragLeave);
+        zone.addEventListener('drop', handleZoneDrop);
+      });
+      
+      // Cards
+      document.querySelectorAll('.asesor-card, .lider-card').forEach(card => {
+        const handle = card.querySelector('.drag-handle');
+        
+        // Mouse events
+        if (handle) {
+          handle.addEventListener('mousedown', (e) => startDrag(e, card));
+        }
+        
+        // Touch events
+        if (handle) {
+          handle.addEventListener('touchstart', (e) => handleTouchStart(e, card), { passive: false });
+        }
+        
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+        card.addEventListener('dragover', handleCardDragOver);
+        card.addEventListener('dragleave', handleCardDragLeave);
+        card.addEventListener('drop', handleCardDrop);
+      });
+    }
+    
+    function startDrag(e, card) {
+      card.setAttribute('draggable', 'true');
+    }
+    
+    function handleDragStart(e) {
+      draggedCard = e.target.closest('.asesor-card, .lider-card');
+      if (!draggedCard) return;
+      
+      draggedCard.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', draggedCard.dataset.id);
+      
+      // Activar todas las drop zones
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.classList.add('drag-active');
+      });
+    }
+    
+    function handleDragEnd(e) {
+      if (draggedCard) {
+        draggedCard.classList.remove('dragging');
+        draggedCard.setAttribute('draggable', 'false');
+      }
+      draggedCard = null;
+      
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.classList.remove('drag-active', 'drag-over');
+      });
+      
+      document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+      });
+    }
+    
+    function handleZoneDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+    
+    function handleZoneDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+    
+    function handleZoneDrop(e) {
+      e.preventDefault();
+      const zone = e.currentTarget;
+      zone.classList.remove('drag-over');
+      
+      if (!draggedCard) return;
+      
+      const id = draggedCard.dataset.id;
+      const section = zone.dataset.section;
+      
+      moveToSection(id, section);
+    }
+    
+    function handleCardDragOver(e) {
+      e.preventDefault();
+      const card = e.target.closest('.asesor-card, .lider-card');
+      if (card && card !== draggedCard) {
+        card.classList.add('drag-over');
+      }
+    }
+    
+    function handleCardDragLeave(e) {
+      const card = e.target.closest('.asesor-card, .lider-card');
+      if (card) card.classList.remove('drag-over');
+    }
+    
+    function handleCardDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const targetCard = e.target.closest('.asesor-card, .lider-card');
+      if (!targetCard || targetCard === draggedCard) return;
+      
+      targetCard.classList.remove('drag-over');
+      
+      const draggedId = draggedCard.dataset.id;
+      const targetId = targetCard.dataset.id;
+      
+      swapOrder(draggedId, targetId);
+    }
+    
+    // Touch handling para móvil
+    let touchStartPos = { x: 0, y: 0 };
+    let touchCard = null;
+    let touchClone = null;
+    
+    function handleTouchStart(e, card) {
+      e.preventDefault();
+      
+      touchCard = card;
+      touchStartPos = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
+      
+      touchTimeout = setTimeout(() => {
+        startTouchDrag(e);
+      }, 200);
+      
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+    }
+    
+    function startTouchDrag(e) {
+      if (!touchCard) return;
+      
+      touchCard.classList.add('dragging');
+      draggedCard = touchCard;
+      
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.classList.add('drag-active');
+      });
+      
+      // Vibración háptica
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
+    
+    function handleTouchMove(e) {
+      if (!draggedCard) {
+        const dx = Math.abs(e.touches[0].clientX - touchStartPos.x);
+        const dy = Math.abs(e.touches[0].clientY - touchStartPos.y);
+        
+        if (dx > 10 || dy > 10) {
+          clearTimeout(touchTimeout);
+        }
+        return;
+      }
+      
+      e.preventDefault();
+      
+      const touch = e.touches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      
+      // Limpiar estados previos
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      
+      // Detectar zona o card debajo
+      const zoneBelow = elementBelow?.closest('.drop-zone');
+      const cardBelow = elementBelow?.closest('.asesor-card, .lider-card');
+      
+      if (cardBelow && cardBelow !== draggedCard) {
+        cardBelow.classList.add('drag-over');
+      } else if (zoneBelow) {
+        zoneBelow.classList.add('drag-over');
+      }
+    }
+    
+    function handleTouchEnd(e) {
+      clearTimeout(touchTimeout);
+      
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      
+      if (!draggedCard) {
+        touchCard = null;
+        return;
+      }
+      
+      const touch = e.changedTouches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      
+      const zoneBelow = elementBelow?.closest('.drop-zone');
+      const cardBelow = elementBelow?.closest('.asesor-card, .lider-card');
+      
+      if (cardBelow && cardBelow !== draggedCard) {
+        swapOrder(draggedCard.dataset.id, cardBelow.dataset.id);
+      } else if (zoneBelow) {
+        moveToSection(draggedCard.dataset.id, zoneBelow.dataset.section);
+      }
+      
+      // Limpiar
+      draggedCard.classList.remove('dragging');
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.classList.remove('drag-active', 'drag-over');
+      });
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      
+      draggedCard = null;
+      touchCard = null;
+    }
+    
+    function moveToSection(id, section) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor) return;
+      
+      let newEstado = asesor.estado;
+      let newTipo = asesor.tipo;
+      
+      switch (section) {
+        case 'inasistencias':
+          newEstado = 'inasistente';
+          break;
+        case 'lideres':
+          newTipo = 'lider';
+          if (newEstado === 'inasistente') newEstado = 'asistente';
+          break;
+        case 'asesores':
+          newTipo = 'asesor';
+          if (newEstado === 'inasistente') newEstado = 'asistente';
+          break;
+      }
+      
+      asesor.estado = newEstado;
+      asesor.tipo = newTipo;
+      saveLocal();
+      render();
+      
+      if (!id.startsWith('temp_')) {
+        addPendingOp({
+          action: 'moveSection',
+          id: id,
+          estado: newEstado,
+          tipo: newTipo
+        });
+      }
+      
+      showToast(`Movido a ${getSectionName(section)}`);
+    }
+    
+    function swapOrder(id1, id2) {
+      const a1 = state.asesores.find(a => a.id === id1);
+      const a2 = state.asesores.find(a => a.id === id2);
+      
+      if (!a1 || !a2) return;
+      
+      // También actualizar sección si es diferente
+      if (a1.estado !== a2.estado || a1.tipo !== a2.tipo) {
+        a1.estado = a2.estado;
+        a1.tipo = a2.tipo;
+      }
+      
+      const tempOrden = a1.orden;
+      a1.orden = a2.orden;
+      a2.orden = tempOrden;
+      
+      saveLocal();
+      render();
+      
+      const updates = [
+        { id: id1, orden: a1.orden, estado: a1.estado, tipo: a1.tipo },
+        { id: id2, orden: a2.orden }
+      ].filter(u => !u.id.startsWith('temp_'));
+      
+      if (updates.length > 0) {
+        addPendingOp({
+          action: 'reorder',
+          orders: updates
+        });
+      }
+    }
+    
+    function getSectionName(section) {
+      switch (section) {
+        case 'inasistencias': return 'Inasistencias';
+        case 'lideres': return 'Líderes';
+        case 'asesores': return 'Asesores';
+        default: return section;
+      }
+    }
+    
+    // ============================================
+    // RENDERIZADO
+    // ============================================
+    function render() {
+      renderHeader();
+      renderAlerts();
+      renderInasistencias();
+      renderLideres();
+      renderAsesores();
+      
+      // Setup drag & drop después de renderizar
+      setTimeout(setupDragAndDrop, 50);
+    }
+    
+    function renderHeader() {
+      document.getElementById('headerTitulo').value = state.config.titulo || '';
+      document.getElementById('headerFecha').value = state.config.fecha || '';
+      
+      const asistentes = state.asesores.filter(a => a.estado === 'asistente').length;
+      const inasistentes = state.asesores.filter(a => a.estado === 'inasistente').length;
+      const sinCodigo = state.asesores.filter(a => a.estado === 'sin-codigo').length;
+      const total = state.asesores.length;
+      
+      document.getElementById('headerStats').innerHTML = `
+        <span class="stat-badge green">✅ ${asistentes}</span>
+        <span class="stat-badge red">❌ ${inasistentes}</span>
+        ${sinCodigo > 0 ? `<span class="stat-badge yellow">⚠️ ${sinCodigo}</span>` : ''}
+        <span class="stat-badge">Total: ${total}</span>
+      `;
+    }
+    
+    function renderAlerts() {
+      const container = document.getElementById('alertsContainer');
+      const alerts = [];
+      
+      // Detectar duplicados
+      const codigosMap = {};
+      state.asesores.forEach(asesor => {
+        if (asesor.estado === 'inasistente') return;
+        const codigos = asesor.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c);
+        codigos.forEach(codigo => {
+          if (!codigosMap[codigo]) codigosMap[codigo] = [];
+          codigosMap[codigo].push(asesor.nombre);
+        });
+      });
+      
+      Object.entries(codigosMap).forEach(([codigo, usuarios]) => {
+        if (usuarios.length > 1) {
+          alerts.push({
+            type: '',
+            icon: '⚠️',
+            message: `Código duplicado: <strong>${codigo.toUpperCase()}</strong> usado por ${usuarios.join(', ')}`
+          });
+        }
+      });
+      
+      // Operaciones pendientes
+      if (pendingOps.length > 0) {
+        alerts.push({
+          type: 'warning',
+          icon: '⏳',
+          message: `${pendingOps.length} cambio(s) pendiente(s) de sincronizar`
+        });
+      }
+      
+      container.innerHTML = alerts.map(a => `
+        <div class="alert ${a.type}">
+          <span>${a.icon}</span>
+          <span>${a.message}</span>
+        </div>
+      `).join('');
+    }
+    
+    function renderInasistencias() {
+      const list = document.getElementById('listInasistencias');
+      const items = state.asesores
+        .filter(a => a.estado === 'inasistente')
+        .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      
+      document.getElementById('countInasistencias').textContent = items.length;
+      
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div>Sin inasistencias</div>';
+        return;
+      }
+      
+      list.innerHTML = items.map(a => renderCard(a)).join('');
+    }
+    
+    function renderLideres() {
+      const list = document.getElementById('listLideres');
+      const items = state.asesores
+        .filter(a => a.tipo === 'lider' && a.estado !== 'inasistente')
+        .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      
+      document.getElementById('countLideres').textContent = items.length;
+      
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state">Sin líderes</div>';
+        return;
+      }
+      
+      list.innerHTML = items.map(a => renderLiderCard(a)).join('');
+    }
+    
+    function renderAsesores() {
+      const list = document.getElementById('listAsesores');
+      const items = state.asesores
+        .filter(a => a.tipo !== 'lider' && a.estado !== 'inasistente')
+        .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+      
+      document.getElementById('countAsesores').textContent = items.length;
+      
+      list.innerHTML = items.map(a => renderCard(a)).join('');
+    }
+    
+    function renderCard(asesor) {
+      const codigos = asesor.codigos.split(',').map(c => c.trim()).filter(c => c);
+      const isDuplicado = checkDuplicado(codigos);
+      const isEditing = editingCard === asesor.id;
+      const isNew = asesor.isNew;
+      
+      return `
+        <div class="asesor-card ${isDuplicado ? 'duplicado' : ''} ${asesor.prestadoDe ? 'prestado' : ''} ${isEditing ? 'editing' : ''}" 
+             data-id="${asesor.id}">
+          <div class="drag-handle">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="status-indicator ${asesor.estado}" onclick="toggleEstado('${asesor.id}')">
+            ${getEstadoEmoji(asesor.estado)}
+          </div>
+          <div class="asesor-info">
+            <div class="asesor-name">
+              <input type="text" class="asesor-name-input" 
+                     value="${escapeHtml(asesor.nombre)}" 
+                     placeholder="Nombre del asesor"
+                     onfocus="startEditing('${asesor.id}')"
+                     onblur="handleNameBlur('${asesor.id}', this.value)">
+              ${asesor.tipo === 'ojt' ? '<span class="tipo-badge ojt">OJT</span>' : ''}
+              ${isDuplicado ? '<span class="duplicate-badge">DUP</span>' : ''}
+            </div>
+            <div class="codigos-container">
+              <div class="codigo-input-wrapper">
+                <input type="text" class="codigo-input" 
+                       value="${escapeHtml(asesor.codigos)}" 
+                       placeholder="Códigos (separar con coma)"
+                       onfocus="startEditing('${asesor.id}')"
+                       onblur="handleCodigoBlur('${asesor.id}', this.value)">
+              </div>
+            </div>
+            <input type="text" class="observaciones-input" 
+                   value="${escapeHtml(asesor.observaciones || '')}" 
+                   placeholder="Observaciones..."
+                   onfocus="startEditing('${asesor.id}')"
+                   onblur="handleObsBlur('${asesor.id}', this.value)">
+            ${isEditing || isNew ? `
+              <div class="tipo-selector">
+                <span class="tipo-option ${asesor.tipo === 'asesor' ? 'active' : ''}" 
+                      onclick="setTipo('${asesor.id}', 'asesor')">Asesor</span>
+                <span class="tipo-option ${asesor.tipo === 'lider' ? 'active' : ''}" 
+                      onclick="setTipo('${asesor.id}', 'lider')">Líder</span>
+                <span class="tipo-option ${asesor.tipo === 'ojt' ? 'active' : ''}" 
+                      onclick="setTipo('${asesor.id}', 'ojt')">OJT</span>
+              </div>
+            ` : ''}
+          </div>
+          <div class="card-actions">
+            ${isNew ? `
+              <button class="action-btn save" onclick="saveAsesor('${asesor.id}')">✓</button>
+            ` : ''}
+            <button class="action-btn delete" onclick="deleteAsesor('${asesor.id}')">🗑</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderLiderCard(asesor) {
+      const codigos = asesor.codigos.split(',').map(c => c.trim()).filter(c => c);
+      
+      return `
+        <div class="lider-card" data-id="${asesor.id}">
+          <div class="drag-handle" style="position:absolute;top:8px;right:8px;">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="lider-name">
+            ${getEstadoEmoji(asesor.estado)} 
+            <input type="text" style="background:transparent;border:none;color:#b45309;font-weight:700;font-size:14px;width:100%;outline:none;" 
+                   value="${escapeHtml(asesor.nombre)}"
+                   onblur="handleNameBlur('${asesor.id}', this.value)">
+          </div>
+          <div class="lider-codigos">
+            ${codigos.map(c => `<span class="lider-codigo">${c}</span>`).join('')}
+            <input type="text" class="lider-codigo" style="background:transparent;border:1px dashed rgba(180,83,9,0.3);"
+                   value="${escapeHtml(asesor.codigos)}" placeholder="Códigos..."
+                   onblur="handleCodigoBlur('${asesor.id}', this.value)">
+          </div>
+          <button class="action-btn delete" style="position:absolute;bottom:8px;right:8px;" 
+                  onclick="deleteAsesor('${asesor.id}')">🗑</button>
+        </div>
+      `;
+    }
+    
+    // ============================================
+    // HANDLERS
+    // ============================================
+    function handleNameBlur(id, value) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor || asesor.nombre === value.trim()) return;
+      
+      if (!asesor.isNew) {
+        updateAsesorField(id, 'nombre', value.trim());
+      }
+    }
+    
+    function handleCodigoBlur(id, value) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor || asesor.codigos === value.trim()) return;
+      
+      if (!asesor.isNew) {
+        updateAsesorField(id, 'codigos', value.trim());
+        render(); // Re-render para actualizar duplicados
+      }
+    }
+    
+    function handleObsBlur(id, value) {
+      const asesor = state.asesores.find(a => a.id === id);
+      if (!asesor || asesor.observaciones === value.trim()) return;
+      
+      if (!asesor.isNew) {
+        updateAsesorField(id, 'observaciones', value.trim());
+      }
+    }
+    
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    function getEstadoEmoji(estado) {
+      switch(estado) {
+        case 'asistente': return '✅';
+        case 'inasistente': return '❌';
+        case 'sin-codigo': return '⚠️';
+        default: return '✅';
+      }
+    }
+    
+    function getEstadoText(estado) {
+      switch(estado) {
+        case 'asistente': return 'Asistente';
+        case 'inasistente': return 'Inasistente';
+        case 'sin-codigo': return 'Sin código';
+        default: return estado;
+      }
+    }
+    
+    function checkDuplicado(codigos) {
+      const allCodigos = {};
+      state.asesores.forEach(a => {
+        if (a.estado === 'inasistente') return;
+        a.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c).forEach(c => {
+          allCodigos[c] = (allCodigos[c] || 0) + 1;
+        });
+      });
+      
+      return codigos.some(c => allCodigos[c.toLowerCase()] > 1);
+    }
+    
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function toggleSection(name) {
+      const section = document.getElementById('section' + capitalize(name));
+      const dropZone = section.querySelector('.drop-zone');
+      const toggle = section.querySelector('.section-toggle');
+      
+      if (dropZone.style.display === 'none') {
+        dropZone.style.display = '';
+        toggle.textContent = '▼';
+      } else {
+        dropZone.style.display = 'none';
+        toggle.textContent = '▶';
+      }
+    }
+    
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+    
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
 </body>
 </html>
