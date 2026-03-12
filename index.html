@@ -594,6 +594,173 @@
 
     .refresh:active { transform: scale(0.9); }
     .refresh.spin { animation: spin 0.8s linear infinite; }
+
+    /* MENU DESPLEGABLE */
+    .dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+      min-width: 140px;
+      overflow: hidden;
+    }
+
+    .dropdown-item {
+      padding: 10px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:active { background: var(--bg); }
+
+    /* ETIQUETAS */
+    .tag-lider {
+      background: linear-gradient(135deg, #ff9500, #ff6b00);
+      color: white;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .tag-ojt {
+      background: #e0f2fe;
+      color: #0277bd;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .tag-selector {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .tag-opt {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: white;
+    }
+
+    .tag-opt.active { border-color: var(--blue); background: #e3f2fd; }
+    .tag-opt.lider { border-color: #ff9500; background: #fff3e0; }
+    .tag-opt.ojt { border-color: #0277bd; background: #e0f2fe; }
+
+    /* CODIGO CLICKEABLE */
+    .code-tag {
+      background: #e3f2fd;
+      color: var(--blue);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: monospace;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+
+    .code-tag:active { background: #bbdefb; }
+
+    .add-code-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px dashed var(--border);
+      background: white;
+      color: var(--blue);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .add-code-btn:active { background: var(--bg); }
+
+    /* HISTORIAL */
+    .historial-section {
+      margin: 12px;
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .historial-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .historial-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .historial-item:last-child { border-bottom: none; }
+
+    .historial-fecha {
+      font-weight: 600;
+      color: var(--text2);
+      font-size: 11px;
+    }
+
+    /* ALERTAS */
+    .alertas-section {
+      margin: 12px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .alerta-item {
+      padding: 6px 0;
+      font-size: 12px;
+      color: #b91c1c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* BOTON COPIAR */
+    .copy-btn {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 12px;
+    }
+
+    .copy-btn:active { opacity: 0.8; }
   </style>
 </head>
 <body>
@@ -609,12 +776,21 @@
     <div class="sync-dot" id="sync"></div>
   </div>
   <div class="header-row" style="margin-top:6px;">
-    <input type="text" id="fecha" placeholder="Fecha" onchange="saveConfig('fecha',this.value)" style="font-weight:400;font-size:12px;">
+    <span id="fecha" style="color:rgba(255,255,255,0.8);font-size:12px;"></span>
   </div>
   <div class="stats" id="stats"></div>
 </header>
 
 <div class="alerts" id="alerts"></div>
+
+<!-- ALERTAS IMPORTANTES -->
+<div class="alertas-section" id="alertasSection" style="display:none;">
+  <div class="historial-title">⚠️ Alertas</div>
+  <div id="alertasLista"></div>
+</div>
+
+<!-- BOTON COPIAR REPORTE -->
+<button class="copy-btn" onclick="copiarReporte()">📋 Copiar Reporte</button>
 
 <!-- INASISTENCIAS -->
 <section class="section">
@@ -650,6 +826,14 @@
       <div class="add-icon">+</div>
       <span>Agregar asesor</span>
     </div>
+  </div>
+</section>
+
+<!-- HISTORIAL -->
+<section class="historial-section" id="historialSection">
+  <div class="historial-title">📜 Historial de Movimientos</div>
+  <div id="historialLista">
+    <div style="color:var(--text2);font-size:12px;">Sin movimientos registrados</div>
   </div>
 </section>
 
@@ -739,6 +923,7 @@ async function fullSync() {
     });
     
     data = j.data || [];
+    historial = j.historial || [];
     config = j.config || config;
     
     saveLocal();
@@ -790,7 +975,6 @@ async function processPending() {
     const op = pending[0];
     
     try {
-      // Construir URL con parámetros GET
       const params = new URLSearchParams();
       for (const key in op) {
         if (op[key] !== undefined && op[key] !== null) {
@@ -799,28 +983,28 @@ async function processPending() {
       }
       
       const url = API + '?' + params.toString();
-      const r = await fetch(url, { method: 'GET' });
+      const r = await fetch(url);
       const j = await r.json();
       
-      console.log('Response:', j);
+      console.log('Respuesta servidor:', j);
       
       if (j.status === 'error') {
-        console.error('Op error:', j.message);
+        console.error('Error:', j.message);
         toast('Error: ' + j.message, 'error');
-        pending.shift();
       } else {
         if (op.action === 'add' && j.id && op.tempId) {
           const idx = data.findIndex(d => d.id === op.tempId);
           if (idx > -1) data[idx].id = j.id;
         }
-        pending.shift();
-        toast('Guardado en servidor');
+        toast('Guardado correctamente');
       }
       
+      pending.shift();
       saveLocal();
       
     } catch(e) {
-      console.error('Network error:', e);
+      console.error('Error de red:', e);
+      toast('Sin conexión', 'warn');
       break;
     }
   }
@@ -970,6 +1154,219 @@ function doDelete(id) {
   
   toast('Eliminado');
 }
+
+// Variable global para historial
+let historial = [];
+
+function toggleMenu(id) {
+  // Cerrar todos los menús
+  document.querySelectorAll('.dropdown').forEach(m => m.style.display = 'none');
+  
+  const menu = document.getElementById('menu_' + id);
+  if (menu) {
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+function moverPersona(id, tipo, estado) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  item.tipo = tipo;
+  item.estado = estado;
+  
+  saveLocal();
+  render();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'move', id, tipo, estado });
+  }
+  
+  toast('Movido correctamente');
+}
+
+function setEtiqueta(id, etiqueta) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  item.etiqueta = etiqueta;
+  saveLocal();
+  render();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'update', id, etiqueta });
+  }
+}
+
+function showTransferMenu(id, codigo) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  // Obtener asistentes (excluyendo al actual)
+  const asistentes = data.filter(d => d.estado !== 'inasistente' && d.id !== id);
+  
+  if (asistentes.length === 0) {
+    toast('No hay otros asistentes disponibles', 'warn');
+    return;
+  }
+  
+  // Crear menú de transferencia
+  const menuHtml = `
+    <div id="transferMenu" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:12px;padding:16px;width:90%;max-width:300px;max-height:70vh;overflow-y:auto;">
+        <div style="font-weight:700;margin-bottom:12px;">Transferir ${codigo} a:</div>
+        ${asistentes.map(a => `
+          <div style="padding:10px;border-bottom:1px solid #eee;cursor:pointer;" onclick="transferirCodigo('${id}', '${a.id}', '${esc(codigo)}', '${esc(item.nombre)}', '${esc(a.nombre)}')">${a.nombre}</div>
+        `).join('')}
+        <button onclick="document.getElementById('transferMenu').remove()" style="width:100%;margin-top:12px;padding:10px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', menuHtml);
+}
+
+function transferirCodigo(origenId, destinoId, codigo, origenNombre, destinoNombre) {
+  // Cerrar menú
+  const menu = document.getElementById('transferMenu');
+  if (menu) menu.remove();
+  
+  const origen = data.find(d => d.id === origenId);
+  const destino = data.find(d => d.id === destinoId);
+  
+  if (!origen || !destino) return;
+  
+  // Verificar duplicado
+  const codigosDestino = destino.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c);
+  if (codigosDestino.includes(codigo.toLowerCase())) {
+    toast(`${destino.nombre} ya tiene este código`, 'error');
+    return;
+  }
+  
+  // Quitar del origen
+  let cOrigen = origen.codigos.split(',').map(c => c.trim()).filter(c => c);
+  cOrigen = cOrigen.filter(c => c.toLowerCase() !== codigo.toLowerCase());
+  origen.codigos = cOrigen.join(', ');
+  
+  // Agregar al destino
+  let cDestino = destino.codigos.split(',').map(c => c.trim()).filter(c => c);
+  cDestino.push(codigo);
+  destino.codigos = cDestino.join(', ');
+  
+  saveLocal();
+  render();
+  
+  // Enviar al servidor
+  addOp({ 
+    action: 'transferir', 
+    origenId, 
+    destinoId, 
+    codigo,
+    origenNombre,
+    destinoNombre
+  });
+  
+  toast(`${codigo} transferido a ${destinoNombre}`);
+}
+
+function agregarCodigo(id) {
+  const nuevoCodigo = prompt('Ingresa el nuevo código:');
+  if (!nuevoCodigo || !nuevoCodigo.trim()) return;
+  
+  const codigo = nuevoCodigo.trim();
+  
+  // Verificar que no exista en otra persona
+  const existeEn = data.find(d => 
+    d.codigos.toLowerCase().split(',').map(c => c.trim()).includes(codigo.toLowerCase())
+  );
+  
+  if (existeEn) {
+    toast(`Este código ya pertenece a ${existeEn.nombre}`, 'error');
+    return;
+  }
+  
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  let codigos = item.codigos.split(',').map(c => c.trim()).filter(c => c);
+  codigos.push(codigo);
+  item.codigos = codigos.join(', ');
+  
+  saveLocal();
+  render();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'update', id, codigos: item.codigos });
+  }
+  
+  toast('Código agregado');
+}
+
+function copiarReporte() {
+  const hoy = new Date();
+  const fecha = hoy.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' });
+  const fechaCapitalizada = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  
+  let reporte = `${fechaCapitalizada}\n\n`;
+  
+  // Inasistencias
+  const inasistentes = data.filter(d => d.estado === 'inasistente');
+  if (inasistentes.length > 0) {
+    reporte += `Inasistencias:\n\n`;
+    inasistentes.forEach(i => {
+      const codigos = i.codigos || 'Sin código';
+      const obs = i.observaciones ? ` — ${i.observaciones}` : '';
+      reporte += `${i.nombre.toUpperCase()} — ${codigos} ❌${obs}\n`;
+    });
+    reporte += '\n';
+  }
+  
+  // Líderes
+  const lideres = data.filter(d => d.tipo === 'lider' && d.estado !== 'inasistente');
+  if (lideres.length > 0) {
+    reporte += `Asistentes:\n\n`;
+    lideres.forEach(l => {
+      const codigos = l.codigos.split(',').map(c => c.trim()).filter(c => c);
+      const obs = l.observaciones ? ` (${l.observaciones})` : '';
+      reporte += `${l.nombre.toUpperCase()} ✅\n`;
+      codigos.forEach(c => reporte += `${c}${obs}\n`);
+      reporte += '\n';
+    });
+  }
+  
+  // Asesores
+  const asesores = data.filter(d => d.tipo !== 'lider' && d.estado !== 'inasistente');
+  if (asesores.length > 0) {
+    reporte += `Asesores:\n\n`;
+    asesores.forEach(a => {
+      const codigos = a.codigos || 'Sin código';
+      const etiqueta = a.etiqueta === 'ojt' ? ' OJT' : '';
+      const obs = a.observaciones ? ` (${a.observaciones})` : '';
+      reporte += `${a.nombre.toUpperCase()}${etiqueta} — ${codigos} ✅${obs}\n`;
+    });
+  }
+  
+  // Copiar al portapapeles
+  navigator.clipboard.writeText(reporte).then(() => {
+    toast('Reporte copiado al portapapeles');
+  }).catch(() => {
+    // Fallback para móviles
+    const textarea = document.createElement('textarea');
+    textarea.value = reporte;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    toast('Reporte copiado');
+  });
+}
+
+// Cerrar menús al hacer clic fuera
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.status') && !e.target.closest('.leader-name')) {
+    document.querySelectorAll('.dropdown').forEach(m => m.style.display = 'none');
+  }
+});
 
 function saveConfig(k, v) {
   config[k] = v;
@@ -1159,9 +1556,14 @@ function swapOrder(id1, id2) {
 // RENDER
 // ============================================
 function render() {
+  // Fecha automática
+  const hoy = new Date();
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
+  const fechaFormateada = hoy.toLocaleDateString('es-PE', opciones);
+  document.getElementById('fecha').textContent = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+  
   // Header
   document.getElementById('titulo').value = config.titulo || '';
-  document.getElementById('fecha').value = config.fecha || '';
   
   // Stats
   const asis = data.filter(d => d.estado === 'asistente').length;
@@ -1176,7 +1578,10 @@ function render() {
     ${pending.length ? `<span class="stat">⏳ ${pending.length}</span>` : ''}
   `;
   
-  // Alerts
+  // Alertas del sistema
+  renderAlertas();
+  
+  // Alerts duplicados
   const alerts = [];
   const codeMap = {};
   
@@ -1200,7 +1605,7 @@ function render() {
   const ina = data.filter(d => d.estado === 'inasistente').sort((a,b) => a.orden - b.orden);
   document.getElementById('cntIna').textContent = ina.length;
   document.getElementById('listIna').innerHTML = ina.length ? 
-    ina.map(d => renderCard(d)).join('') : 
+    ina.map(d => renderCard(d, 'inasistente')).join('') : 
     '<div class="empty"><div class="empty-icon">🎉</div>Sin inasistencias</div>';
   
   // Líderes
@@ -1213,38 +1618,117 @@ function render() {
   // Asesores
   const ase = data.filter(d => d.tipo !== 'lider' && d.estado !== 'inasistente').sort((a,b) => a.orden - b.orden);
   document.getElementById('cntAse').textContent = ase.length;
-  document.getElementById('listAse').innerHTML = ase.map(d => renderCard(d)).join('');
+  document.getElementById('listAse').innerHTML = ase.map(d => renderCard(d, 'asesor')).join('');
+  
+  // Historial
+  renderHistorial();
   
   // Setup drag
   setTimeout(setupDrag, 10);
 }
 
-function renderCard(d) {
-  const codes = d.codigos.split(',').map(c => c.trim()).filter(c => c);
-  const isDup = checkDup(codes);
+function renderAlertas() {
+  const alertas = [];
+  
+  // Códigos de inasistentes sin asignar
+  const inasistentes = data.filter(d => d.estado === 'inasistente');
+  const asistentes = data.filter(d => d.estado !== 'inasistente');
+  
+  inasistentes.forEach(ina => {
+    const codigos = ina.codigos.split(',').map(c => c.trim()).filter(c => c);
+    codigos.forEach(codigo => {
+      const asignado = asistentes.some(a => 
+        a.codigos.toLowerCase().includes(codigo.toLowerCase())
+      );
+      if (!asignado) {
+        alertas.push(`El código <b>${codigo}</b> de ${ina.nombre} (inasistente) no ha sido asignado a nadie`);
+      }
+    });
+  });
+  
+  const section = document.getElementById('alertasSection');
+  const lista = document.getElementById('alertasLista');
+  
+  if (alertas.length > 0) {
+    section.style.display = 'block';
+    lista.innerHTML = alertas.map(a => `<div class="alerta-item">⚠️ ${a}</div>`).join('');
+  } else {
+    section.style.display = 'none';
+  }
+}
+
+function renderHistorial() {
+  const lista = document.getElementById('historialLista');
+  
+  if (!historial || historial.length === 0) {
+    lista.innerHTML = '<div style="color:var(--text2);font-size:12px;">Sin movimientos registrados</div>';
+    return;
+  }
+  
+  // Agrupar por fecha
+  const porFecha = {};
+  historial.forEach(h => {
+    if (!porFecha[h.fecha]) porFecha[h.fecha] = [];
+    porFecha[h.fecha].push(h);
+  });
+  
+  let html = '';
+  Object.keys(porFecha).reverse().slice(0, 5).forEach(fecha => {
+    html += `<div class="historial-fecha">${fecha}</div>`;
+    porFecha[fecha].forEach(h => {
+      html += `<div class="historial-item">🔄 <b>${h.codigo}</b>: ${h.de} → ${h.a} (${h.hora})</div>`;
+    });
+  });
+  
+  lista.innerHTML = html;
+}
+
+function renderCard(d, seccion) {
+  const codigos = d.codigos.split(',').map(c => c.trim()).filter(c => c);
+  const isDup = checkDup(codigos);
   const isNew = d.isNew;
   
+  let etiquetaHtml = '';
+  if (d.etiqueta === 'lider') {
+    etiquetaHtml = '<span class="tag-lider">LÍDER</span>';
+  } else if (d.etiqueta === 'ojt') {
+    etiquetaHtml = '<span class="tag-ojt">OJT</span>';
+  }
+  
+  const opcionesMover = [];
+  if (seccion !== 'asesor') opcionesMover.push({label: '✅ Mover a Asesores', target: 'asesor', estado: 'asistente'});
+  if (seccion !== 'lider') opcionesMover.push({label: '👑 Mover a Líderes', target: 'lider', estado: 'asistente'});
+  if (seccion !== 'inasistente') opcionesMover.push({label: '❌ Mover a Inasistencias', target: 'asesor', estado: 'inasistente'});
+  
   return `
-    <div class="card ${isDup ? 'dup' : ''}" data-id="${d.id}">
+    <div class="card ${isDup ? 'dup' : ''}" data-id="${d.id}" style="position:relative;">
       <div class="handle"><span></span><span></span><span></span></div>
-      <div class="status ${d.estado}" onclick="toggleStatus('${d.id}')">
+      <div class="status ${d.estado}" onclick="toggleMenu('${d.id}')" style="position:relative;">
         ${d.estado === 'asistente' ? '✅' : d.estado === 'inasistente' ? '❌' : '⚠️'}
+        <div class="dropdown" id="menu_${d.id}" style="display:none;">
+          ${opcionesMover.map(op => `
+            <div class="dropdown-item" onclick="event.stopPropagation(); moverPersona('${d.id}', '${op.target}', '${op.estado}')">${op.label}</div>
+          `).join('')}
+        </div>
       </div>
       <div class="info">
         <div class="info-row">
           <input class="name-input" value="${esc(d.nombre)}" placeholder="Nombre" 
                  onblur="updateField('${d.id}','nombre',this.value)">
-          ${d.tipo === 'lider' ? '<span class="badge lider">Líder</span>' : ''}
-          ${d.tipo === 'ojt' ? '<span class="badge ojt">OJT</span>' : ''}
+          ${etiquetaHtml}
           ${isDup ? '<span class="badge dup">DUP</span>' : ''}
         </div>
-        <input class="code-input" value="${esc(d.codigos)}" placeholder="Códigos (separar con coma)"
-               onblur="updateField('${d.id}','codigos',this.value)">
-        ${isNew ? `
-          <div class="tipo-sel">
-            <span class="tipo-opt ${d.tipo==='asesor'?'active':''}" onclick="setTipo('${d.id}','asesor')">Asesor</span>
-            <span class="tipo-opt ${d.tipo==='lider'?'active':''}" onclick="setTipo('${d.id}','lider')">Líder</span>
-            <span class="tipo-opt ${d.tipo==='ojt'?'active':''}" onclick="setTipo('${d.id}','ojt')">OJT</span>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px;">
+          ${codigos.map(c => `
+            <span class="code-tag" onclick="showTransferMenu('${d.id}', '${esc(c)}')">${c}</span>
+          `).join('')}
+          <button class="add-code-btn" onclick="agregarCodigo('${d.id}')">+</button>
+        </div>
+        ${isNew || true ? `
+          <div class="tag-selector">
+            <span class="tag-opt ${d.etiqueta === '' ? 'active' : ''}" onclick="setEtiqueta('${d.id}', '')">Ninguna</span>
+            <span class="tag-opt lider ${d.etiqueta === 'lider' ? 'active' : ''}" onclick="setEtiqueta('${d.id}', 'lider')">Líder</span>
+            <span class="tag-opt ojt ${d.etiqueta === 'ojt' ? 'active' : ''}" onclick="setEtiqueta('${d.id}', 'ojt')">OJT</span>
           </div>
         ` : ''}
       </div>
@@ -1257,21 +1741,34 @@ function renderCard(d) {
 }
 
 function renderLeader(d) {
-  const codes = d.codigos.split(',').map(c => c.trim()).filter(c => c);
+  const codigos = d.codigos.split(',').map(c => c.trim()).filter(c => c);
+  
+  let etiquetaHtml = '';
+  if (d.etiqueta === 'ojt') {
+    etiquetaHtml = '<span class="tag-ojt">OJT</span>';
+  }
   
   return `
-    <div class="leader-card" data-id="${d.id}">
+    <div class="leader-card" data-id="${d.id}" style="position:relative;">
       <div class="leader-handle handle"><span></span><span></span><span></span></div>
-      <div class="leader-name">
+      <div class="leader-name" onclick="toggleMenu('${d.id}')" style="cursor:pointer;position:relative;">
         ${d.estado === 'asistente' ? '✅' : '⚠️'}
         <input style="background:transparent;border:none;color:#b45309;font-weight:700;font-size:12px;flex:1;outline:none;" 
                value="${esc(d.nombre)}" onblur="updateField('${d.id}','nombre',this.value)">
+        ${etiquetaHtml}
+        <div class="dropdown" id="menu_${d.id}" style="display:none;">
+          <div class="dropdown-item" onclick="event.stopPropagation(); moverPersona('${d.id}', 'asesor', 'asistente')">✅ Mover a Asesores</div>
+          <div class="dropdown-item" onclick="event.stopPropagation(); moverPersona('${d.id}', 'asesor', 'inasistente')">❌ Mover a Inasistencias</div>
+        </div>
       </div>
-      <div class="leader-codes">
-        ${codes.map(c => `<span class="leader-code">${c}</span>`).join('') || '<span style="opacity:0.5;font-size:10px;">Sin código</span>'}
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;">
+        ${codigos.map(c => `<span class="code-tag" onclick="showTransferMenu('${d.id}', '${esc(c)}')">${c}</span>`).join('')}
+        <button class="add-code-btn" onclick="agregarCodigo('${d.id}')" style="width:18px;height:18px;font-size:12px;">+</button>
       </div>
-      <input style="background:transparent;border:1px dashed rgba(180,83,9,0.3);border-radius:4px;padding:2px 6px;font-size:10px;color:#b45309;width:100%;margin-top:4px;outline:none;"
-             value="${esc(d.codigos)}" placeholder="Códigos" onblur="updateField('${d.id}','codigos',this.value)">
+      <div class="tag-selector" style="margin-top:6px;">
+        <span class="tag-opt ${d.etiqueta === '' ? 'active' : ''}" onclick="setEtiqueta('${d.id}', '')">-</span>
+        <span class="tag-opt ojt ${d.etiqueta === 'ojt' ? 'active' : ''}" onclick="setEtiqueta('${d.id}', 'ojt')">OJT</span>
+      </div>
       <button class="leader-del" onclick="confirmDel('${d.id}')">🗑</button>
     </div>
   `;
