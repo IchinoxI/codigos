@@ -3,29 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Gestión de Códigos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>Gestión de Asesores</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg-primary: #f5f5f7;
-      --bg-secondary: #ffffff;
-      --bg-card: #ffffff;
-      --bg-card-hover: #f0f0f2;
-      --text-primary: #1d1d1f;
-      --text-secondary: #6e6e73;
-      --text-muted: #999999;
-      --accent-blue: #007aff;
-      --accent-green: #34c759;
-      --accent-red: #ff3b30;
-      --accent-yellow: #ff9500;
-      --accent-purple: #af52de;
-      --border-color: #e5e5e7;
-      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
-      --radius: 14px;
-      --radius-sm: 10px;
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --border: #e5e5ea;
+      --text: #1c1c1e;
+      --text2: #8e8e93;
+      --blue: #007aff;
+      --green: #34c759;
+      --red: #ff3b30;
+      --orange: #ff9500;
+      --purple: #af52de;
     }
 
     * {
@@ -33,1890 +25,1301 @@
       padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
     }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+    html, body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.3;
+      overflow-x: hidden;
       min-height: 100vh;
-      line-height: 1.5;
-      font-size: 15px;
-      padding-bottom: 100px;
     }
 
-    /* ============ HEADER ============ */
+    /* HEADER COMPACTO */
     .header {
-      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-      padding: 20px 16px;
+      background: linear-gradient(135deg, #1a365d 0%, #0d1b2a 100%);
+      padding: 12px 16px;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: var(--shadow-lg);
     }
 
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .header-left {
-      flex: 1;
-    }
-
-    .header-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #ffffff;
+    .header-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-
-    .header-title-input {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 18px;
-      padding: 6px 10px;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 250px;
-      outline: none;
-    }
-
-    .header-title-input::placeholder {
-      color: rgba(255,255,255,0.5);
-    }
-
-    .header-date {
-      font-size: 14px;
-      color: rgba(255,255,255,0.7);
-      margin-top: 6px;
-    }
-
-    .header-date-input {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: rgba(255,255,255,0.9);
-      font-size: 14px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      outline: none;
-      width: 100%;
-      max-width: 200px;
-    }
-
-    .header-stats {
-      display: flex;
       gap: 10px;
-      margin-top: 14px;
-      flex-wrap: wrap;
     }
 
-    .stat-badge {
+    .header input {
       background: rgba(255,255,255,0.15);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
+      border: none;
+      color: #fff;
+      font-size: 14px;
       font-weight: 600;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(10px);
+      padding: 6px 10px;
+      border-radius: 6px;
+      flex: 1;
+      outline: none;
     }
 
-    .stat-badge.green { background: rgba(52, 199, 89, 0.3); }
-    .stat-badge.red { background: rgba(255, 59, 48, 0.3); }
-    .stat-badge.yellow { background: rgba(255, 149, 0, 0.3); }
-    .stat-badge.purple { background: rgba(175, 82, 222, 0.3); }
+    .header input::placeholder { color: rgba(255,255,255,0.5); }
 
-    /* ============ SYNC INDICATOR ============ */
-    .sync-indicator {
-      width: 12px;
-      height: 12px;
+    .sync-dot {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: var(--accent-green);
-      transition: all 0.3s;
+      background: var(--green);
       flex-shrink: 0;
     }
 
-    .sync-indicator.syncing {
-      background: var(--accent-yellow);
-      animation: pulse 1s infinite;
-    }
+    .sync-dot.syncing { background: var(--orange); animation: pulse 1s infinite; }
+    .sync-dot.error { background: var(--red); }
 
-    .sync-indicator.error {
-      background: var(--accent-red);
-    }
+    @keyframes pulse { 50% { opacity: 0.5; } }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.9); }
-    }
-
-    /* ============ ALERTS ============ */
-    .alerts-container {
-      padding: 12px 16px 0;
-    }
-
-    .alert {
-      background: #fff5f5;
-      border: 1px solid #fecaca;
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      margin-bottom: 10px;
+    .stats {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: #991b1b;
-    }
-
-    .alert.warning {
-      background: #fffbeb;
-      border-color: #fde68a;
-      color: #92400e;
-    }
-
-    .alert.info {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1e40af;
-    }
-
-    /* ============ SECTIONS ============ */
-    .section {
-      margin: 16px;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 4px;
-      margin-bottom: 10px;
-    }
-
-    .section-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      display: flex;
-      align-items: center;
       gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
     }
 
-    .section-count {
-      background: var(--bg-card);
-      padding: 3px 10px;
+    .stat {
+      background: rgba(255,255,255,0.15);
+      padding: 4px 10px;
       border-radius: 12px;
       font-size: 12px;
-      font-weight: 600;
-      box-shadow: var(--shadow);
-    }
-
-    .section-toggle {
-      background: var(--bg-card);
-      border: none;
-      color: var(--text-secondary);
-      font-size: 14px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-    }
-
-    /* ============ DROP ZONE ============ */
-    .drop-zone {
-      min-height: 60px;
-      border: 2px dashed transparent;
-      border-radius: var(--radius);
-      transition: all 0.3s ease;
-      padding: 4px;
-    }
-
-    .drop-zone.drag-active {
-      border-color: var(--accent-blue);
-      background: rgba(0, 122, 255, 0.05);
-    }
-
-    .drop-zone.drag-over {
-      border-color: var(--accent-green);
-      background: rgba(52, 199, 89, 0.1);
-    }
-
-    /* ============ CARDS ============ */
-    .card-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .asesor-card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 14px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      position: relative;
-      transition: all 0.2s ease;
-      border: 2px solid transparent;
-      box-shadow: var(--shadow);
-      touch-action: none;
-    }
-
-    .asesor-card.editing {
-      border-color: var(--accent-blue);
-      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(0, 122, 255, 0.1);
-    }
-
-    .asesor-card.dragging {
-      opacity: 0.6;
-      transform: scale(0.97);
-      box-shadow: var(--shadow-lg);
-      z-index: 1000;
-    }
-
-    .asesor-card.drag-over {
-      border-color: var(--accent-green);
-      background: rgba(52, 199, 89, 0.05);
-    }
-
-    .asesor-card.duplicado {
-      border-color: var(--accent-red);
-      box-shadow: var(--shadow), 0 0 0 3px rgba(255, 59, 48, 0.15);
-    }
-
-    .asesor-card.prestado {
-      border-color: var(--accent-purple);
-    }
-
-    /* ============ DRAG HANDLE ============ */
-    .drag-handle {
-      width: 28px;
-      height: 44px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      cursor: grab;
-      flex-shrink: 0;
-      background: var(--bg-primary);
-      border-radius: 8px;
-      margin: -4px 0;
-      touch-action: none;
-    }
-
-    .drag-handle:active {
-      cursor: grabbing;
-      background: var(--border-color);
-    }
-
-    .drag-handle span {
-      display: block;
-      width: 18px;
-      height: 2px;
-      background: var(--text-muted);
-      border-radius: 1px;
-    }
-
-    /* ============ STATUS INDICATOR ============ */
-    .status-indicator {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      cursor: pointer;
-      transition: transform 0.15s ease;
-      border: 2px solid transparent;
-    }
-
-    .status-indicator:active {
-      transform: scale(0.88);
-    }
-
-    .status-indicator.asistente {
-      background: rgba(52, 199, 89, 0.15);
-      border-color: rgba(52, 199, 89, 0.3);
-    }
-
-    .status-indicator.inasistente {
-      background: rgba(255, 59, 48, 0.15);
-      border-color: rgba(255, 59, 48, 0.3);
-    }
-
-    .status-indicator.sin-codigo {
-      background: rgba(255, 149, 0, 0.15);
-      border-color: rgba(255, 149, 0, 0.3);
-    }
-
-    /* ============ ASESOR INFO ============ */
-    .asesor-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .asesor-name {
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .asesor-name-input {
-      background: transparent;
-      border: none;
-      color: var(--text-primary);
-      font-weight: 600;
-      font-size: 15px;
-      width: 100%;
-      outline: none;
-      padding: 0;
-    }
-
-    .asesor-name-input:focus {
-      background: var(--bg-primary);
-      padding: 6px 10px;
-      margin: -6px -10px;
-      border-radius: 6px;
-    }
-
-    .tipo-badge {
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .tipo-badge.lider {
-      background: linear-gradient(135deg, #ff9500, #ff6b00);
-      color: #ffffff;
-    }
-
-    .tipo-badge.ojt {
-      background: rgba(175, 82, 222, 0.2);
-      color: var(--accent-purple);
-    }
-
-    .codigos-container {
-      margin-top: 8px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .codigo-input-wrapper {
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .codigo-input {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: 'SF Mono', 'Consolas', monospace;
-      color: var(--accent-blue);
-      width: 100%;
-      outline: none;
-    }
-
-    .codigo-input:focus {
-      border-color: var(--accent-blue);
-    }
-
-    .codigo-tag {
-      background: rgba(0, 122, 255, 0.1);
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-family: 'SF Mono', 'Consolas', monospace;
-      color: var(--accent-blue);
+      color: #fff;
       font-weight: 500;
     }
 
-    .codigo-tag.prestado-de {
-      background: rgba(175, 82, 222, 0.15);
-      color: var(--accent-purple);
+    /* ALERTAS */
+    .alerts {
+      padding: 8px 12px;
     }
 
-    .observaciones-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 6px;
-      font-style: italic;
-      outline: none;
-    }
-
-    .observaciones-input:focus {
-      background: var(--bg-primary);
-      padding: 4px 8px;
-      margin: 2px -8px;
-      border-radius: 4px;
-    }
-
-    .observaciones-input::placeholder {
-      color: var(--text-muted);
-      opacity: 0.6;
-    }
-
-    /* ============ CARD ACTIONS ============ */
-    .card-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .action-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      border: none;
-      background: var(--bg-primary);
-      color: var(--text-secondary);
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-    }
-
-    .action-btn:active {
-      transform: scale(0.9);
-      background: var(--border-color);
-    }
-
-    .action-btn.delete {
-      color: var(--accent-red);
-    }
-
-    .action-btn.delete:active {
-      background: rgba(255, 59, 48, 0.1);
-    }
-
-    .action-btn.save {
-      color: var(--accent-green);
-      background: rgba(52, 199, 89, 0.1);
-    }
-
-    /* ============ TIPO SELECTOR INLINE ============ */
-    .tipo-selector {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .tipo-option {
-      padding: 6px 12px;
+    .alert {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 8px 12px;
       border-radius: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      border: 1px solid var(--border-color);
-      background: var(--bg-primary);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.15s;
+      font-size: 12px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .tipo-option.active {
-      border-color: var(--accent-blue);
-      background: rgba(0, 122, 255, 0.1);
-      color: var(--accent-blue);
-    }
-
-    /* ============ LIDERES GRID ============ */
-    .lideres-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-    }
-
-    .lider-card {
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-      border-radius: var(--radius);
-      padding: 14px;
-      border: 2px solid rgba(255, 149, 0, 0.3);
-      box-shadow: var(--shadow);
-      touch-action: none;
-    }
-
-    .lider-card.dragging {
-      opacity: 0.6;
-    }
-
-    .lider-card.drag-over {
-      border-color: var(--accent-green);
-    }
-
-    .lider-name {
-      font-weight: 700;
-      font-size: 14px;
+    .alert.warn {
+      background: #fffbeb;
+      border-color: #fde68a;
       color: #b45309;
-      margin-bottom: 8px;
+    }
+
+    /* SECCIONES */
+    .section {
+      margin: 8px 12px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 4px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .lider-codigos {
+    .section-count {
+      background: var(--card);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .section-toggle {
+      background: var(--card);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text2);
+      cursor: pointer;
+    }
+
+    /* DROP ZONE */
+    .drop-zone {
+      min-height: 40px;
+      border: 2px dashed transparent;
+      border-radius: 10px;
+      transition: all 0.2s;
+      padding: 2px;
+    }
+
+    .drop-zone.active {
+      border-color: var(--blue);
+      background: rgba(0,122,255,0.05);
+    }
+
+    .drop-zone.over {
+      border-color: var(--green);
+      background: rgba(52,199,89,0.1);
+    }
+
+    /* LISTA DE CARDS - ULTRA COMPACTA */
+    .cards {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
-    .lider-codigo {
-      background: rgba(180, 83, 9, 0.15);
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-family: 'SF Mono', 'Consolas', monospace;
-      color: #b45309;
-      font-weight: 500;
+    /* CARD COMPACTA */
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+      touch-action: none;
+      transition: all 0.15s;
     }
 
-    /* ============ NEW CARD ============ */
-    .new-card {
-      background: var(--bg-card);
-      border: 2px dashed var(--border-color);
-      border-radius: var(--radius);
-      padding: 16px;
+    .card.dragging {
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+
+    .card.over {
+      border-color: var(--green);
+      background: #f0fff4;
+    }
+
+    .card.dup {
+      border-color: var(--red);
+    }
+
+    /* DRAG HANDLE */
+    .handle {
+      width: 18px;
+      height: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      cursor: grab;
+      flex-shrink: 0;
+      opacity: 0.4;
+    }
+
+    .handle span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--text2);
+      border-radius: 1px;
+    }
+
+    /* STATUS */
+    .status {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .status.asistente { background: rgba(52,199,89,0.15); }
+    .status.inasistente { background: rgba(255,59,48,0.15); }
+    .status.sin-codigo { background: rgba(255,149,0,0.15); }
+
+    /* INFO */
+    .info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .name-input {
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      width: 100%;
+      outline: none;
+      padding: 2px 0;
+    }
+
+    .name-input:focus {
+      background: var(--bg);
+      padding: 2px 6px;
+      margin: -2px -6px;
+      border-radius: 4px;
+    }
+
+    .badge {
+      font-size: 9px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .badge.lider {
+      background: linear-gradient(135deg, #ff9500, #ff6b00);
+      color: #fff;
+    }
+
+    .badge.ojt {
+      background: rgba(175,82,222,0.2);
+      color: var(--purple);
+    }
+
+    .badge.dup {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .code-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-family: 'SF Mono', monospace;
+      color: var(--blue);
+      padding: 3px 6px;
+      border-radius: 4px;
+      width: 100%;
+      outline: none;
+    }
+
+    .code-input:focus {
+      border-color: var(--blue);
+    }
+
+    /* ACTIONS */
+    .actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background: var(--bg);
+      color: var(--text2);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn:active {
+      transform: scale(0.9);
+    }
+
+    .btn.del { color: var(--red); }
+    .btn.save { color: var(--green); background: rgba(52,199,89,0.15); }
+
+    /* TIPO SELECTOR INLINE */
+    .tipo-sel {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .tipo-opt {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--bg);
+      color: var(--text2);
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .tipo-opt.active {
+      background: rgba(0,122,255,0.1);
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    /* LÍDERES GRID */
+    .leaders {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 6px;
+    }
+
+    .leader-card {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 10px;
+      padding: 10px;
+      position: relative;
+      touch-action: none;
+    }
+
+    .leader-card.dragging { opacity: 0.5; }
+    .leader-card.over { border-color: var(--green); }
+
+    .leader-name {
+      font-weight: 700;
+      font-size: 12px;
+      color: #b45309;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .leader-codes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+
+    .leader-code {
+      background: rgba(180,83,9,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: #b45309;
+    }
+
+    .leader-handle {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 16px;
+      opacity: 0.3;
+    }
+
+    .leader-del {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(255,59,48,0.1);
+      border: none;
+      color: var(--red);
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* ADD BUTTON */
+    .add-btn {
+      background: var(--card);
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text2);
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    .add-btn:active {
+      background: var(--bg);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .add-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--blue);
+    }
+
+    /* CONFIRM DELETE */
+    .confirm-del {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,59,48,0.95);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      color: var(--text-muted);
-      font-size: 14px;
+      z-index: 5;
+    }
+
+    .confirm-del span { color: #fff; font-weight: 600; font-size: 12px; }
+
+    .confirm-del button {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
-      min-height: 60px;
     }
 
-    .new-card:active {
-      background: var(--bg-primary);
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
-    }
+    .confirm-del .yes { background: #fff; color: var(--red); }
+    .confirm-del .no { background: rgba(255,255,255,0.2); color: #fff; }
 
-    .new-card-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--bg-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: var(--accent-blue);
-    }
-
-    /* ============ TOAST ============ */
-    .toast-container {
+    /* TOAST */
+    .toast-box {
       position: fixed;
-      bottom: 24px;
-      left: 16px;
-      right: 16px;
-      z-index: 300;
+      bottom: 20px;
+      left: 12px;
+      right: 12px;
+      z-index: 200;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       pointer-events: none;
     }
 
     .toast {
-      background: var(--text-primary);
-      color: var(--bg-card);
-      padding: 14px 18px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 500;
+      background: var(--text);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      animation: toastIn 0.3s ease;
-      box-shadow: var(--shadow-lg);
-      pointer-events: auto;
+      gap: 8px;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
-    @keyframes toastIn {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
-    /* ============ EMPTY STATE ============ */
-    .empty-state {
+    /* EMPTY */
+    .empty {
       text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
+      padding: 20px;
+      color: var(--text2);
+      font-size: 12px;
     }
 
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
+    .empty-icon { font-size: 28px; margin-bottom: 6px; }
 
-    /* ============ LOADING ============ */
-    .loading-overlay {
+    /* LOADING */
+    .loading {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--bg-primary);
+      inset: 0;
+      background: var(--bg);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 500;
-      gap: 16px;
-    }
-
-    .loading-spinner {
-      width: 44px;
-      height: 44px;
-      border: 3px solid var(--border-color);
-      border-top-color: var(--accent-blue);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    .loading-text {
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* ============ DUPLICATE BADGE ============ */
-    .duplicate-badge {
-      background: var(--accent-red);
-      color: white;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-    }
-
-    /* ============ CONFIRM DELETE ============ */
-    .delete-confirm {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 59, 48, 0.95);
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       gap: 12px;
-      z-index: 10;
     }
 
-    .delete-confirm-btn {
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
 
-    .delete-confirm-btn.yes {
-      background: #ffffff;
-      color: var(--accent-red);
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .delete-confirm-btn.no {
-      background: rgba(255,255,255,0.2);
-      color: #ffffff;
-    }
+    .hidden { display: none !important; }
 
-    /* ============ REFRESH BUTTON ============ */
-    .refresh-btn {
+    /* REFRESH BTN */
+    .refresh {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
+      bottom: 20px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       border: none;
-      background: var(--accent-blue);
-      color: white;
-      font-size: 24px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 20px;
       cursor: pointer;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+      z-index: 90;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 90;
-      transition: transform 0.2s;
     }
 
-    .refresh-btn:active {
-      transform: scale(0.9);
-    }
-
-    .refresh-btn.spinning {
-      animation: spin 0.8s linear infinite;
-    }
+    .refresh:active { transform: scale(0.9); }
+    .refresh.spin { animation: spin 0.8s linear infinite; }
   </style>
 </head>
 <body>
-  <!-- Loading -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Cargando datos...</div>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <span style="color:var(--text2);font-size:13px;">Cargando...</span>
+</div>
+
+<header class="header">
+  <div class="header-row">
+    <input type="text" id="titulo" placeholder="Nombre del equipo" onchange="saveConfig('titulo',this.value)">
+    <div class="sync-dot" id="sync"></div>
   </div>
+  <div class="header-row" style="margin-top:6px;">
+    <input type="text" id="fecha" placeholder="Fecha" onchange="saveConfig('fecha',this.value)" style="font-weight:400;font-size:12px;">
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
 
-  <!-- Header -->
-  <header class="header">
-    <div class="header-content">
-      <div class="header-left">
-        <div class="header-title">
-          <input type="text" class="header-title-input" id="headerTitulo" 
-                 placeholder="Nombre del equipo" 
-                 onchange="saveConfig('titulo', this.value)">
-          <div class="sync-indicator" id="syncIndicator"></div>
-        </div>
-        <div class="header-date">
-          <input type="text" class="header-date-input" id="headerFecha" 
-                 placeholder="Fecha"
-                 onchange="saveConfig('fecha', this.value)">
-        </div>
-      </div>
+<div class="alerts" id="alerts"></div>
+
+<!-- INASISTENCIAS -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-title">❌ Inasistencias <span class="section-count" id="cntIna">0</span></div>
+    <button class="section-toggle" onclick="toggle('ina')">▼</button>
+  </div>
+  <div class="drop-zone" id="dropIna" data-section="inasistente">
+    <div class="cards" id="listIna"></div>
+  </div>
+</section>
+
+<!-- LÍDERES -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-title">👑 Líderes <span class="section-count" id="cntLid">0</span></div>
+    <button class="section-toggle" onclick="toggle('lid')">▼</button>
+  </div>
+  <div class="drop-zone" id="dropLid" data-section="lider">
+    <div class="leaders" id="listLid"></div>
+  </div>
+</section>
+
+<!-- ASESORES -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-title">✅ Asesores <span class="section-count" id="cntAse">0</span></div>
+    <button class="section-toggle" onclick="toggle('ase')">▼</button>
+  </div>
+  <div class="drop-zone" id="dropAse" data-section="asesor">
+    <div class="cards" id="listAse"></div>
+    <div class="add-btn" onclick="addNew()">
+      <div class="add-icon">+</div>
+      <span>Agregar asesor</span>
     </div>
-    <div class="header-stats" id="headerStats"></div>
-  </header>
+  </div>
+</section>
 
-  <!-- Alerts Container -->
-  <div class="alerts-container" id="alertsContainer"></div>
+<div class="toast-box" id="toasts"></div>
+<button class="refresh" id="refreshBtn" onclick="forceSync()">↻</button>
 
-  <!-- Inasistencias Section -->
-  <section class="section" id="sectionInasistencias">
-    <div class="section-header">
-      <div class="section-title">
-        <span>❌ Inasistencias</span>
-        <span class="section-count" id="countInasistencias">0</span>
-      </div>
-      <button class="section-toggle" onclick="toggleSection('inasistencias')">▼</button>
-    </div>
-    <div class="drop-zone" id="dropInasistencias" data-section="inasistencias">
-      <div class="card-list" id="listInasistencias"></div>
-    </div>
-  </section>
+<script>
+// ============================================
+// CONFIG
+// ============================================
+const API = "https://script.google.com/macros/s/AKfycbxgz0yIfmySUmgw-CZ2j1dNnHjsnnqg9hMSU63rva_q1soxojTalm2Bxlzyl75GVhTp/exec";
 
-  <!-- Líderes Section -->
-  <section class="section" id="sectionLideres">
-    <div class="section-header">
-      <div class="section-title">
-        <span>👑 Líderes</span>
-        <span class="section-count" id="countLideres">0</span>
-      </div>
-      <button class="section-toggle" onclick="toggleSection('lideres')">▼</button>
-    </div>
-    <div class="drop-zone" id="dropLideres" data-section="lideres">
-      <div class="lideres-grid" id="listLideres"></div>
-    </div>
-  </section>
+// ============================================
+// STATE
+// ============================================
+let data = [];
+let config = { titulo: '', fecha: '' };
+let pending = [];
+let syncing = false;
 
-  <!-- Asesores Section -->
-  <section class="section" id="sectionAsesores">
-    <div class="section-header">
-      <div class="section-title">
-        <span>✅ Asesores</span>
-        <span class="section-count" id="countAsesores">0</span>
-      </div>
-      <button class="section-toggle" onclick="toggleSection('asesores')">▼</button>
-    </div>
-    <div class="drop-zone" id="dropAsesores" data-section="asesores">
-      <div class="card-list" id="listAsesores"></div>
-      <!-- Botón para agregar nuevo -->
-      <div class="new-card" onclick="createNewAsesor()">
-        <div class="new-card-icon">+</div>
-        <span>Agregar nuevo asesor</span>
-      </div>
-    </div>
-  </section>
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  loadLocal();
+  render();
+  
+  const ok = await fullSync();
+  document.getElementById('loading').classList.add('hidden');
+  
+  if (!ok) {
+    toast('Sin conexión - modo offline', 'warn');
+  }
+  
+  // Auto sync
+  setInterval(processPending, 3000);
+  setInterval(backgroundSync, 10000);
+});
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
+// ============================================
+// LOCAL STORAGE
+// ============================================
+function loadLocal() {
+  try {
+    const s = localStorage.getItem('asesores_v3');
+    if (s) {
+      const p = JSON.parse(s);
+      data = p.data || [];
+      config = p.config || config;
+    }
+    const q = localStorage.getItem('asesores_pending_v3');
+    if (q) pending = JSON.parse(q);
+  } catch(e) { console.error(e); }
+}
 
-  <!-- Refresh Button -->
-  <button class="refresh-btn" id="refreshBtn" onclick="forceSync()">↻</button>
+function saveLocal() {
+  try {
+    localStorage.setItem('asesores_v3', JSON.stringify({ data, config }));
+    localStorage.setItem('asesores_pending_v3', JSON.stringify(pending));
+  } catch(e) { console.error(e); }
+}
 
-  <script>
-    // ============================================
-    // CONFIGURACIÓN
-    // ============================================
-    const API = "https://script.google.com/macros/s/AKfycbxgz0yIfmySUmgw-CZ2j1dNnHjsnnqg9hMSU63rva_q1soxojTalm2Bxlzyl75GVhTp/exec";
+// ============================================
+// SYNC
+// ============================================
+async function fullSync() {
+  setSync('syncing');
+  try {
+    const r = await fetch(API + '?action=full', { method: 'GET' });
+    const j = await r.json();
     
-    // ============================================
-    // ESTADO
-    // ============================================
-    let state = {
-      asesores: [],
-      config: { titulo: '', fecha: '' },
-      lastUpdate: 0
+    if (j.error) throw new Error(j.error);
+    
+    // Map temp IDs
+    const tempMap = {};
+    data.forEach(d => {
+      if (d.id.startsWith('temp_')) {
+        const match = j.data.find(x => x.nombre === d.nombre && Math.abs(x.timestamp - d.timestamp) < 120000);
+        if (match) tempMap[d.id] = match.id;
+      }
+    });
+    
+    // Update pending ops
+    pending = pending.filter(op => {
+      if (op.action === 'add' && tempMap[op.tempId]) return false;
+      if (tempMap[op.id]) op.id = tempMap[op.id];
+      return true;
+    });
+    
+    data = j.data || [];
+    config = j.config || config;
+    
+    saveLocal();
+    render();
+    setSync('ok');
+    return true;
+  } catch(e) {
+    console.error('Sync error:', e);
+    setSync('error');
+    return false;
+  }
+}
+
+async function backgroundSync() {
+  if (!navigator.onLine || syncing) return;
+  try {
+    const r = await fetch(API + '?action=full');
+    const j = await r.json();
+    if (j.data) {
+      data = j.data;
+      config = j.config || config;
+      saveLocal();
+      render();
+    }
+  } catch(e) {}
+}
+
+async function forceSync() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spin');
+  await processPending();
+  await fullSync();
+  btn.classList.remove('spin');
+  toast('Sincronizado');
+}
+
+function setSync(s) {
+  const el = document.getElementById('sync');
+  el.className = 'sync-dot' + (s === 'syncing' ? ' syncing' : s === 'error' ? ' error' : '');
+}
+
+// ============================================
+// PENDING OPS
+// ============================================
+function addOp(op) {
+  op.ts = Date.now();
+  pending.push(op);
+  saveLocal();
+  processPending();
+}
+
+async function processPending() {
+  if (syncing || !pending.length || !navigator.onLine) return;
+  
+  syncing = true;
+  setSync('syncing');
+  
+  while (pending.length) {
+    const op = pending[0];
+    
+    try {
+      const r = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(op)
+      });
+      
+      const j = await r.json();
+      console.log('Response:', j);
+      
+      if (j.status === 'error') {
+        console.error('Op error:', j.message);
+        toast('Error: ' + j.message, 'error');
+        pending.shift();
+      } else {
+        // Success - update temp ID if needed
+        if (op.action === 'add' && j.id && op.tempId) {
+          const idx = data.findIndex(d => d.id === op.tempId);
+          if (idx > -1) data[idx].id = j.id;
+        }
+        pending.shift();
+      }
+      
+      saveLocal();
+      
+    } catch(e) {
+      console.error('Network error:', e);
+      break;
+    }
+  }
+  
+  syncing = false;
+  setSync(pending.length ? 'error' : 'ok');
+}
+
+// ============================================
+// CRUD
+// ============================================
+function addNew() {
+  const tempId = 'temp_' + Date.now();
+  const ts = Date.now();
+  
+  const newItem = {
+    id: tempId,
+    timestamp: ts,
+    nombre: '',
+    codigos: '',
+    estado: 'asistente',
+    tipo: 'asesor',
+    orden: data.length + 1,
+    observaciones: '',
+    prestadoDe: '',
+    prestadoA: '',
+    isNew: true
+  };
+  
+  data.push(newItem);
+  saveLocal();
+  render();
+  
+  setTimeout(() => {
+    const input = document.querySelector(`[data-id="${tempId}"] .name-input`);
+    if (input) input.focus();
+  }, 50);
+}
+
+function saveNew(id) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (!card) return;
+  
+  const name = card.querySelector('.name-input')?.value.trim();
+  const codes = card.querySelector('.code-input')?.value.trim();
+  
+  if (!name) {
+    toast('Nombre requerido', 'error');
+    return;
+  }
+  
+  item.nombre = name;
+  item.codigos = codes || '';
+  delete item.isNew;
+  
+  saveLocal();
+  render();
+  
+  addOp({
+    action: 'add',
+    tempId: id,
+    nombre: item.nombre,
+    codigos: item.codigos,
+    estado: item.estado,
+    tipo: item.tipo,
+    observaciones: item.observaciones || ''
+  });
+  
+  toast('Guardado');
+}
+
+function updateField(id, field, value) {
+  const item = data.find(d => d.id === id);
+  if (!item || item[field] === value) return;
+  
+  item[field] = value;
+  saveLocal();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'update', id, [field]: value });
+  }
+  
+  if (field === 'codigos') render();
+}
+
+function toggleStatus(id) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  const states = ['asistente', 'inasistente', 'sin-codigo'];
+  const i = states.indexOf(item.estado);
+  item.estado = states[(i + 1) % 3];
+  
+  saveLocal();
+  render();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'update', id, estado: item.estado });
+  }
+  
+  toast('Estado: ' + item.estado);
+}
+
+function setTipo(id, tipo) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  item.tipo = tipo;
+  saveLocal();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'update', id, tipo });
+  }
+}
+
+function confirmDel(id) {
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (!card) return;
+  
+  const div = document.createElement('div');
+  div.className = 'confirm-del';
+  div.innerHTML = `
+    <span>¿Eliminar?</span>
+    <button class="yes" onclick="doDelete('${id}')">Sí</button>
+    <button class="no" onclick="cancelDel('${id}')">No</button>
+  `;
+  card.style.position = 'relative';
+  card.appendChild(div);
+}
+
+function cancelDel(id) {
+  const el = document.querySelector(`[data-id="${id}"] .confirm-del`);
+  if (el) el.remove();
+}
+
+function doDelete(id) {
+  data = data.filter(d => d.id !== id);
+  saveLocal();
+  render();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'delete', id });
+  }
+  
+  toast('Eliminado');
+}
+
+function saveConfig(k, v) {
+  config[k] = v;
+  saveLocal();
+  addOp({ action: 'updateConfig', clave: k, valor: v });
+}
+
+// ============================================
+// MOVE BETWEEN SECTIONS
+// ============================================
+function moveToSection(id, section) {
+  const item = data.find(d => d.id === id);
+  if (!item) return;
+  
+  let newEstado = item.estado;
+  let newTipo = item.tipo;
+  
+  if (section === 'inasistente') {
+    newEstado = 'inasistente';
+  } else if (section === 'lider') {
+    newTipo = 'lider';
+    if (newEstado === 'inasistente') newEstado = 'asistente';
+  } else if (section === 'asesor') {
+    newTipo = 'asesor';
+    if (newEstado === 'inasistente') newEstado = 'asistente';
+  }
+  
+  item.estado = newEstado;
+  item.tipo = newTipo;
+  
+  saveLocal();
+  render();
+  
+  if (!id.startsWith('temp_')) {
+    addOp({ action: 'move', id, estado: newEstado, tipo: newTipo });
+  }
+  
+  toast('Movido');
+}
+
+// ============================================
+// DRAG & DROP
+// ============================================
+let dragId = null;
+let dragEl = null;
+
+function setupDrag() {
+  // Drop zones
+  document.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.ondragover = e => { e.preventDefault(); zone.classList.add('over'); };
+    zone.ondragleave = () => zone.classList.remove('over');
+    zone.ondrop = e => {
+      e.preventDefault();
+      zone.classList.remove('over');
+      if (dragId) moveToSection(dragId, zone.dataset.section);
+    };
+  });
+  
+  // Cards
+  document.querySelectorAll('.card, .leader-card').forEach(card => {
+    const handle = card.querySelector('.handle, .leader-handle');
+    const id = card.dataset.id;
+    
+    // Mouse
+    if (handle) {
+      handle.onmousedown = () => card.draggable = true;
+    }
+    
+    card.ondragstart = e => {
+      dragId = id;
+      dragEl = card;
+      card.classList.add('dragging');
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.add('active'));
     };
     
-    let pendingOps = [];
-    let isSyncing = false;
-    let editingCard = null;
-    let draggedCard = null;
-    let touchTimeout = null;
+    card.ondragend = () => {
+      card.classList.remove('dragging');
+      card.draggable = false;
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('active', 'over'));
+      document.querySelectorAll('.over').forEach(x => x.classList.remove('over'));
+      dragId = null;
+      dragEl = null;
+    };
     
-    // ============================================
-    // INICIALIZACIÓN
-    // ============================================
-    document.addEventListener('DOMContentLoaded', init);
-    
-    async function init() {
-      loadLocal();
-      render();
-      
-      await fullSync();
-      
-      document.getElementById('loadingOverlay').classList.add('hidden');
-      
-      // Sync periódico
-      setInterval(backgroundSync, 3000);
-      
-      // Procesar operaciones pendientes
-      setInterval(processPending, 1000);
-      
-      // Online/Offline
-      window.addEventListener('online', () => processPending());
-    }
-    
-    function loadLocal() {
-      try {
-        const saved = localStorage.getItem('gestion_state_v2');
-        if (saved) state = { ...state, ...JSON.parse(saved) };
-        
-        const pending = localStorage.getItem('gestion_pending_v2');
-        if (pending) pendingOps = JSON.parse(pending);
-      } catch (e) {
-        console.error('Error loading local:', e);
-      }
-    }
-    
-    function saveLocal() {
-      try {
-        localStorage.setItem('gestion_state_v2', JSON.stringify(state));
-        localStorage.setItem('gestion_pending_v2', JSON.stringify(pendingOps));
-      } catch (e) {
-        console.error('Error saving local:', e);
-      }
-    }
-    
-    // ============================================
-    // SINCRONIZACIÓN
-    // ============================================
-    async function fullSync() {
-      setSyncStatus('syncing');
-      
-      try {
-        const response = await fetchWithTimeout(`${API}?action=full`, {}, 15000);
-        const data = await response.json();
-        
-        if (data.error) throw new Error(data.error);
-        
-        // Mapear IDs temporales a IDs reales
-        const tempToReal = {};
-        
-        state.asesores.forEach(local => {
-          if (local.id.startsWith('temp_')) {
-            const match = data.data.find(d => 
-              d.nombre === local.nombre && 
-              Math.abs(d.timestamp - local.timestamp) < 60000
-            );
-            if (match) {
-              tempToReal[local.id] = match.id;
-            }
-          }
-        });
-        
-        // Actualizar operaciones pendientes con IDs reales
-        pendingOps = pendingOps.map(op => {
-          if (op.tempId && tempToReal[op.tempId]) {
-            op.id = tempToReal[op.tempId];
-            delete op.tempId;
-          }
-          if (op.id && tempToReal[op.id]) {
-            op.id = tempToReal[op.id];
-          }
-          return op;
-        }).filter(op => op.action !== 'add' || !tempToReal[op.tempId]);
-        
-        state.asesores = data.data || [];
-        state.config = data.config || state.config;
-        state.lastUpdate = data.lastUpdate || Date.now();
-        
-        saveLocal();
-        render();
-        setSyncStatus('ok');
-        
-        return true;
-      } catch (error) {
-        console.error('Full sync error:', error);
-        setSyncStatus('error');
-        return false;
-      }
-    }
-    
-    async function backgroundSync() {
-      if (isSyncing || !navigator.onLine) return;
-      
-      try {
-        const response = await fetchWithTimeout(
-          `${API}?action=sync&last=${state.lastUpdate}`, 
-          {}, 
-          10000
-        );
-        const data = await response.json();
-        
-        if (data.hasChanges) {
-          state.asesores = data.data || state.asesores;
-          state.config = data.config || state.config;
-          state.lastUpdate = data.lastUpdate;
-          saveLocal();
-          render();
-        }
-        
-        setSyncStatus('ok');
-      } catch (error) {
-        console.error('Background sync error:', error);
-      }
-    }
-    
-    async function forceSync() {
-      const btn = document.getElementById('refreshBtn');
-      btn.classList.add('spinning');
-      
-      await processPending();
-      await fullSync();
-      
-      btn.classList.remove('spinning');
-      showToast('Sincronizado correctamente');
-    }
-    
-    function setSyncStatus(status) {
-      const indicator = document.getElementById('syncIndicator');
-      indicator.className = 'sync-indicator';
-      if (status === 'syncing') indicator.classList.add('syncing');
-      if (status === 'error') indicator.classList.add('error');
-    }
-    
-    async function fetchWithTimeout(url, options = {}, timeout = 10000) {
-      const controller = new AbortController();
-      const id = setTimeout(() => controller.abort(), timeout);
-      
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal
-      });
-      
-      clearTimeout(id);
-      return response;
-    }
-    
-    // ============================================
-    // OPERACIONES PENDIENTES
-    // ============================================
-    function addPendingOp(op) {
-      pendingOps.push({ ...op, timestamp: Date.now() });
-      saveLocal();
-      processPending();
-    }
-    
-    async function processPending() {
-      if (isSyncing || pendingOps.length === 0 || !navigator.onLine) return;
-      
-      isSyncing = true;
-      setSyncStatus('syncing');
-      
-      const toProcess = [...pendingOps];
-      
-      for (const op of toProcess) {
-        try {
-          const response = await fetchWithTimeout(API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(op)
-          }, 15000);
-          
-          const result = await response.json();
-          
-          if (result.status === 'error') {
-            console.error('Op error:', result.message);
-            showToast('Error: ' + result.message, 'error');
-          } else {
-            // Operación exitosa - remover de pendientes
-            const idx = pendingOps.findIndex(p => p.timestamp === op.timestamp);
-            if (idx > -1) pendingOps.splice(idx, 1);
-            
-            // Si es add, actualizar ID temporal con ID real
-            if (op.action === 'add' && result.id && op.tempId) {
-              const localIdx = state.asesores.findIndex(a => a.id === op.tempId);
-              if (localIdx > -1) {
-                state.asesores[localIdx].id = result.id;
-              }
-            }
-          }
-          
-          saveLocal();
-          
-        } catch (error) {
-          console.error('Process pending error:', error);
-          break;
-        }
-      }
-      
-      isSyncing = false;
-      setSyncStatus(pendingOps.length > 0 ? 'error' : 'ok');
-    }
-    
-    // ============================================
-    // CRUD LOCAL + SYNC
-    // ============================================
-    function createNewAsesor() {
-      const tempId = 'temp_' + Date.now();
-      
-      const newAsesor = {
-        id: tempId,
-        timestamp: Date.now(),
-        nombre: '',
-        codigos: '',
-        estado: 'asistente',
-        tipo: 'asesor',
-        orden: state.asesores.length + 1,
-        observaciones: '',
-        prestadoDe: '',
-        prestadoA: '',
-        isNew: true
-      };
-      
-      state.asesores.push(newAsesor);
-      saveLocal();
-      render();
-      
-      // Enfocar el input de nombre
-      setTimeout(() => {
-        const input = document.querySelector(`[data-id="${tempId}"] .asesor-name-input`);
-        if (input) {
-          input.focus();
-          startEditing(tempId);
-        }
-      }, 100);
-    }
-    
-    function saveAsesor(id) {
-      const card = document.querySelector(`[data-id="${id}"]`);
-      if (!card) return;
-      
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor) return;
-      
-      const nameInput = card.querySelector('.asesor-name-input');
-      const codigoInput = card.querySelector('.codigo-input');
-      const obsInput = card.querySelector('.observaciones-input');
-      
-      const updates = {
-        nombre: nameInput ? nameInput.value.trim() : asesor.nombre,
-        codigos: codigoInput ? codigoInput.value.trim() : asesor.codigos,
-        observaciones: obsInput ? obsInput.value.trim() : asesor.observaciones
-      };
-      
-      // Validar nombre
-      if (!updates.nombre) {
-        showToast('El nombre es requerido', 'error');
-        nameInput?.focus();
-        return;
-      }
-      
-      // Actualizar estado local
-      Object.assign(asesor, updates);
-      delete asesor.isNew;
-      
-      saveLocal();
-      
-      // Encolar operación
-      if (id.startsWith('temp_')) {
-        addPendingOp({
-          action: 'add',
-          tempId: id,
-          ...updates,
-          tipo: asesor.tipo,
-          estado: asesor.estado
-        });
-      } else {
-        addPendingOp({
-          action: 'update',
-          id: id,
-          ...updates
-        });
-      }
-      
-      stopEditing();
-      render();
-      showToast('Guardado correctamente');
-    }
-    
-    function updateAsesorField(id, field, value) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor) return;
-      
-      asesor[field] = value;
-      saveLocal();
-      
-      if (!id.startsWith('temp_')) {
-        addPendingOp({
-          action: 'update',
-          id: id,
-          [field]: value
-        });
-      }
-    }
-    
-    function toggleEstado(id) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor) return;
-      
-      const estados = ['asistente', 'inasistente', 'sin-codigo'];
-      const currentIdx = estados.indexOf(asesor.estado);
-      const newEstado = estados[(currentIdx + 1) % estados.length];
-      
-      asesor.estado = newEstado;
-      saveLocal();
-      render();
-      
-      if (!id.startsWith('temp_')) {
-        addPendingOp({
-          action: 'update',
-          id: id,
-          estado: newEstado
-        });
-      }
-      
-      showToast(`Estado: ${getEstadoText(newEstado)}`);
-    }
-    
-    function setTipo(id, tipo) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor) return;
-      
-      asesor.tipo = tipo;
-      saveLocal();
-      
-      if (!id.startsWith('temp_')) {
-        addPendingOp({
-          action: 'update',
-          id: id,
-          tipo: tipo
-        });
-      }
-    }
-    
-    function deleteAsesor(id) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor) return;
-      
-      // Mostrar confirmación inline
-      const card = document.querySelector(`[data-id="${id}"]`);
-      if (!card) return;
-      
-      const confirm = document.createElement('div');
-      confirm.className = 'delete-confirm';
-      confirm.innerHTML = `
-        <span style="color:white;font-weight:600;">¿Eliminar?</span>
-        <button class="delete-confirm-btn yes" onclick="confirmDelete('${id}')">Sí</button>
-        <button class="delete-confirm-btn no" onclick="cancelDelete('${id}')">No</button>
-      `;
-      card.appendChild(confirm);
-    }
-    
-    function confirmDelete(id) {
-      state.asesores = state.asesores.filter(a => a.id !== id);
-      saveLocal();
-      render();
-      
-      if (!id.startsWith('temp_')) {
-        addPendingOp({ action: 'delete', id: id });
-      }
-      
-      showToast('Eliminado');
-    }
-    
-    function cancelDelete(id) {
-      const confirm = document.querySelector(`[data-id="${id}"] .delete-confirm`);
-      if (confirm) confirm.remove();
-    }
-    
-    function saveConfig(clave, valor) {
-      state.config[clave] = valor;
-      saveLocal();
-      
-      addPendingOp({
-        action: 'updateConfig',
-        clave: clave,
-        valor: valor
-      });
-    }
-    
-    // ============================================
-    // EDICIÓN INLINE
-    // ============================================
-    function startEditing(id) {
-      if (editingCard && editingCard !== id) {
-        stopEditing();
-      }
-      
-      editingCard = id;
-      const card = document.querySelector(`[data-id="${id}"]`);
-      if (card) card.classList.add('editing');
-    }
-    
-    function stopEditing() {
-      if (editingCard) {
-        const card = document.querySelector(`[data-id="${editingCard}"]`);
-        if (card) card.classList.remove('editing');
-      }
-      editingCard = null;
-    }
-    
-    // ============================================
-    // DRAG & DROP
-    // ============================================
-    function setupDragAndDrop() {
-      // Drop zones
-      document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.addEventListener('dragover', handleZoneDragOver);
-        zone.addEventListener('dragleave', handleZoneDragLeave);
-        zone.addEventListener('drop', handleZoneDrop);
-      });
-      
-      // Cards
-      document.querySelectorAll('.asesor-card, .lider-card').forEach(card => {
-        const handle = card.querySelector('.drag-handle');
-        
-        // Mouse events
-        if (handle) {
-          handle.addEventListener('mousedown', (e) => startDrag(e, card));
-        }
-        
-        // Touch events
-        if (handle) {
-          handle.addEventListener('touchstart', (e) => handleTouchStart(e, card), { passive: false });
-        }
-        
-        card.addEventListener('dragstart', handleDragStart);
-        card.addEventListener('dragend', handleDragEnd);
-        card.addEventListener('dragover', handleCardDragOver);
-        card.addEventListener('dragleave', handleCardDragLeave);
-        card.addEventListener('drop', handleCardDrop);
-      });
-    }
-    
-    function startDrag(e, card) {
-      card.setAttribute('draggable', 'true');
-    }
-    
-    function handleDragStart(e) {
-      draggedCard = e.target.closest('.asesor-card, .lider-card');
-      if (!draggedCard) return;
-      
-      draggedCard.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', draggedCard.dataset.id);
-      
-      // Activar todas las drop zones
-      document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.classList.add('drag-active');
-      });
-    }
-    
-    function handleDragEnd(e) {
-      if (draggedCard) {
-        draggedCard.classList.remove('dragging');
-        draggedCard.setAttribute('draggable', 'false');
-      }
-      draggedCard = null;
-      
-      document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.classList.remove('drag-active', 'drag-over');
-      });
-      
-      document.querySelectorAll('.drag-over').forEach(el => {
-        el.classList.remove('drag-over');
-      });
-    }
-    
-    function handleZoneDragOver(e) {
+    card.ondragover = e => {
       e.preventDefault();
-      e.currentTarget.classList.add('drag-over');
-    }
+      if (card !== dragEl) card.classList.add('over');
+    };
     
-    function handleZoneDragLeave(e) {
-      e.currentTarget.classList.remove('drag-over');
-    }
+    card.ondragleave = () => card.classList.remove('over');
     
-    function handleZoneDrop(e) {
-      e.preventDefault();
-      const zone = e.currentTarget;
-      zone.classList.remove('drag-over');
-      
-      if (!draggedCard) return;
-      
-      const id = draggedCard.dataset.id;
-      const section = zone.dataset.section;
-      
-      moveToSection(id, section);
-    }
-    
-    function handleCardDragOver(e) {
-      e.preventDefault();
-      const card = e.target.closest('.asesor-card, .lider-card');
-      if (card && card !== draggedCard) {
-        card.classList.add('drag-over');
-      }
-    }
-    
-    function handleCardDragLeave(e) {
-      const card = e.target.closest('.asesor-card, .lider-card');
-      if (card) card.classList.remove('drag-over');
-    }
-    
-    function handleCardDrop(e) {
+    card.ondrop = e => {
       e.preventDefault();
       e.stopPropagation();
-      
-      const targetCard = e.target.closest('.asesor-card, .lider-card');
-      if (!targetCard || targetCard === draggedCard) return;
-      
-      targetCard.classList.remove('drag-over');
-      
-      const draggedId = draggedCard.dataset.id;
-      const targetId = targetCard.dataset.id;
-      
-      swapOrder(draggedId, targetId);
-    }
+      card.classList.remove('over');
+      if (dragId && id !== dragId) swapOrder(dragId, id);
+    };
     
-    // Touch handling para móvil
-    let touchStartPos = { x: 0, y: 0 };
-    let touchCard = null;
-    let touchClone = null;
-    
-    function handleTouchStart(e, card) {
-      e.preventDefault();
+    // Touch
+    if (handle) {
+      let touchStarted = false;
+      let moved = false;
       
-      touchCard = card;
-      touchStartPos = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY
+      handle.ontouchstart = e => {
+        e.preventDefault();
+        touchStarted = true;
+        moved = false;
+        card.classList.add('dragging');
+        dragId = id;
+        dragEl = card;
+        document.querySelectorAll('.drop-zone').forEach(z => z.classList.add('active'));
+        if (navigator.vibrate) navigator.vibrate(30);
       };
       
-      touchTimeout = setTimeout(() => {
-        startTouchDrag(e);
-      }, 200);
-      
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
-      document.addEventListener('touchend', handleTouchEnd);
-    }
-    
-    function startTouchDrag(e) {
-      if (!touchCard) return;
-      
-      touchCard.classList.add('dragging');
-      draggedCard = touchCard;
-      
-      document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.classList.add('drag-active');
-      });
-      
-      // Vibración háptica
-      if (navigator.vibrate) navigator.vibrate(50);
-    }
-    
-    function handleTouchMove(e) {
-      if (!draggedCard) {
-        const dx = Math.abs(e.touches[0].clientX - touchStartPos.x);
-        const dy = Math.abs(e.touches[0].clientY - touchStartPos.y);
+      handle.ontouchmove = e => {
+        if (!touchStarted) return;
+        e.preventDefault();
+        moved = true;
         
-        if (dx > 10 || dy > 10) {
-          clearTimeout(touchTimeout);
+        const touch = e.touches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        document.querySelectorAll('.over').forEach(x => x.classList.remove('over'));
+        
+        const zone = el?.closest('.drop-zone');
+        const targetCard = el?.closest('.card, .leader-card');
+        
+        if (targetCard && targetCard !== card) {
+          targetCard.classList.add('over');
+        } else if (zone) {
+          zone.classList.add('over');
         }
-        return;
-      }
+      };
       
-      e.preventDefault();
-      
-      const touch = e.touches[0];
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-      
-      // Limpiar estados previos
-      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      
-      // Detectar zona o card debajo
-      const zoneBelow = elementBelow?.closest('.drop-zone');
-      const cardBelow = elementBelow?.closest('.asesor-card, .lider-card');
-      
-      if (cardBelow && cardBelow !== draggedCard) {
-        cardBelow.classList.add('drag-over');
-      } else if (zoneBelow) {
-        zoneBelow.classList.add('drag-over');
-      }
-    }
-    
-    function handleTouchEnd(e) {
-      clearTimeout(touchTimeout);
-      
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      
-      if (!draggedCard) {
-        touchCard = null;
-        return;
-      }
-      
-      const touch = e.changedTouches[0];
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-      
-      const zoneBelow = elementBelow?.closest('.drop-zone');
-      const cardBelow = elementBelow?.closest('.asesor-card, .lider-card');
-      
-      if (cardBelow && cardBelow !== draggedCard) {
-        swapOrder(draggedCard.dataset.id, cardBelow.dataset.id);
-      } else if (zoneBelow) {
-        moveToSection(draggedCard.dataset.id, zoneBelow.dataset.section);
-      }
-      
-      // Limpiar
-      draggedCard.classList.remove('dragging');
-      document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.classList.remove('drag-active', 'drag-over');
-      });
-      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      
-      draggedCard = null;
-      touchCard = null;
-    }
-    
-    function moveToSection(id, section) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor) return;
-      
-      let newEstado = asesor.estado;
-      let newTipo = asesor.tipo;
-      
-      switch (section) {
-        case 'inasistencias':
-          newEstado = 'inasistente';
-          break;
-        case 'lideres':
-          newTipo = 'lider';
-          if (newEstado === 'inasistente') newEstado = 'asistente';
-          break;
-        case 'asesores':
-          newTipo = 'asesor';
-          if (newEstado === 'inasistente') newEstado = 'asistente';
-          break;
-      }
-      
-      asesor.estado = newEstado;
-      asesor.tipo = newTipo;
-      saveLocal();
-      render();
-      
-      if (!id.startsWith('temp_')) {
-        addPendingOp({
-          action: 'moveSection',
-          id: id,
-          estado: newEstado,
-          tipo: newTipo
-        });
-      }
-      
-      showToast(`Movido a ${getSectionName(section)}`);
-    }
-    
-    function swapOrder(id1, id2) {
-      const a1 = state.asesores.find(a => a.id === id1);
-      const a2 = state.asesores.find(a => a.id === id2);
-      
-      if (!a1 || !a2) return;
-      
-      // También actualizar sección si es diferente
-      if (a1.estado !== a2.estado || a1.tipo !== a2.tipo) {
-        a1.estado = a2.estado;
-        a1.tipo = a2.tipo;
-      }
-      
-      const tempOrden = a1.orden;
-      a1.orden = a2.orden;
-      a2.orden = tempOrden;
-      
-      saveLocal();
-      render();
-      
-      const updates = [
-        { id: id1, orden: a1.orden, estado: a1.estado, tipo: a1.tipo },
-        { id: id2, orden: a2.orden }
-      ].filter(u => !u.id.startsWith('temp_'));
-      
-      if (updates.length > 0) {
-        addPendingOp({
-          action: 'reorder',
-          orders: updates
-        });
-      }
-    }
-    
-    function getSectionName(section) {
-      switch (section) {
-        case 'inasistencias': return 'Inasistencias';
-        case 'lideres': return 'Líderes';
-        case 'asesores': return 'Asesores';
-        default: return section;
-      }
-    }
-    
-    // ============================================
-    // RENDERIZADO
-    // ============================================
-    function render() {
-      renderHeader();
-      renderAlerts();
-      renderInasistencias();
-      renderLideres();
-      renderAsesores();
-      
-      // Setup drag & drop después de renderizar
-      setTimeout(setupDragAndDrop, 50);
-    }
-    
-    function renderHeader() {
-      document.getElementById('headerTitulo').value = state.config.titulo || '';
-      document.getElementById('headerFecha').value = state.config.fecha || '';
-      
-      const asistentes = state.asesores.filter(a => a.estado === 'asistente').length;
-      const inasistentes = state.asesores.filter(a => a.estado === 'inasistente').length;
-      const sinCodigo = state.asesores.filter(a => a.estado === 'sin-codigo').length;
-      const total = state.asesores.length;
-      
-      document.getElementById('headerStats').innerHTML = `
-        <span class="stat-badge green">✅ ${asistentes}</span>
-        <span class="stat-badge red">❌ ${inasistentes}</span>
-        ${sinCodigo > 0 ? `<span class="stat-badge yellow">⚠️ ${sinCodigo}</span>` : ''}
-        <span class="stat-badge">Total: ${total}</span>
-      `;
-    }
-    
-    function renderAlerts() {
-      const container = document.getElementById('alertsContainer');
-      const alerts = [];
-      
-      // Detectar duplicados
-      const codigosMap = {};
-      state.asesores.forEach(asesor => {
-        if (asesor.estado === 'inasistente') return;
-        const codigos = asesor.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c);
-        codigos.forEach(codigo => {
-          if (!codigosMap[codigo]) codigosMap[codigo] = [];
-          codigosMap[codigo].push(asesor.nombre);
-        });
-      });
-      
-      Object.entries(codigosMap).forEach(([codigo, usuarios]) => {
-        if (usuarios.length > 1) {
-          alerts.push({
-            type: '',
-            icon: '⚠️',
-            message: `Código duplicado: <strong>${codigo.toUpperCase()}</strong> usado por ${usuarios.join(', ')}`
-          });
+      handle.ontouchend = e => {
+        if (!touchStarted) return;
+        touchStarted = false;
+        
+        card.classList.remove('dragging');
+        
+        const touch = e.changedTouches[0];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        const zone = el?.closest('.drop-zone');
+        const targetCard = el?.closest('.card, .leader-card');
+        
+        if (moved) {
+          if (targetCard && targetCard !== card && targetCard.dataset.id) {
+            swapOrder(id, targetCard.dataset.id);
+          } else if (zone) {
+            moveToSection(id, zone.dataset.section);
+          }
         }
-      });
-      
-      // Operaciones pendientes
-      if (pendingOps.length > 0) {
-        alerts.push({
-          type: 'warning',
-          icon: '⏳',
-          message: `${pendingOps.length} cambio(s) pendiente(s) de sincronizar`
-        });
-      }
-      
-      container.innerHTML = alerts.map(a => `
-        <div class="alert ${a.type}">
-          <span>${a.icon}</span>
-          <span>${a.message}</span>
+        
+        document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('active', 'over'));
+        document.querySelectorAll('.over').forEach(x => x.classList.remove('over'));
+        
+        dragId = null;
+        dragEl = null;
+      };
+    }
+  });
+}
+
+function swapOrder(id1, id2) {
+  const a = data.find(d => d.id === id1);
+  const b = data.find(d => d.id === id2);
+  if (!a || !b) return;
+  
+  // Also move to same section
+  a.estado = b.estado;
+  a.tipo = b.tipo;
+  
+  const tmp = a.orden;
+  a.orden = b.orden;
+  b.orden = tmp;
+  
+  saveLocal();
+  render();
+  
+  if (!id1.startsWith('temp_')) {
+    addOp({ action: 'move', id: id1, estado: a.estado, tipo: a.tipo, orden: a.orden });
+  }
+}
+
+// ============================================
+// RENDER
+// ============================================
+function render() {
+  // Header
+  document.getElementById('titulo').value = config.titulo || '';
+  document.getElementById('fecha').value = config.fecha || '';
+  
+  // Stats
+  const asis = data.filter(d => d.estado === 'asistente').length;
+  const inas = data.filter(d => d.estado === 'inasistente').length;
+  const sinc = data.filter(d => d.estado === 'sin-codigo').length;
+  
+  document.getElementById('stats').innerHTML = `
+    <span class="stat">✅ ${asis}</span>
+    <span class="stat">❌ ${inas}</span>
+    ${sinc ? `<span class="stat">⚠️ ${sinc}</span>` : ''}
+    <span class="stat">Total: ${data.length}</span>
+    ${pending.length ? `<span class="stat">⏳ ${pending.length}</span>` : ''}
+  `;
+  
+  // Alerts
+  const alerts = [];
+  const codeMap = {};
+  
+  data.forEach(d => {
+    if (d.estado === 'inasistente') return;
+    d.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c).forEach(c => {
+      if (!codeMap[c]) codeMap[c] = [];
+      codeMap[c].push(d.nombre);
+    });
+  });
+  
+  Object.entries(codeMap).forEach(([c, names]) => {
+    if (names.length > 1) {
+      alerts.push(`⚠️ Duplicado: <b>${c.toUpperCase()}</b> → ${names.join(', ')}`);
+    }
+  });
+  
+  document.getElementById('alerts').innerHTML = alerts.map(a => `<div class="alert">${a}</div>`).join('');
+  
+  // Inasistencias
+  const ina = data.filter(d => d.estado === 'inasistente').sort((a,b) => a.orden - b.orden);
+  document.getElementById('cntIna').textContent = ina.length;
+  document.getElementById('listIna').innerHTML = ina.length ? 
+    ina.map(d => renderCard(d)).join('') : 
+    '<div class="empty"><div class="empty-icon">🎉</div>Sin inasistencias</div>';
+  
+  // Líderes
+  const lid = data.filter(d => d.tipo === 'lider' && d.estado !== 'inasistente').sort((a,b) => a.orden - b.orden);
+  document.getElementById('cntLid').textContent = lid.length;
+  document.getElementById('listLid').innerHTML = lid.length ?
+    lid.map(d => renderLeader(d)).join('') :
+    '<div class="empty">Sin líderes</div>';
+  
+  // Asesores
+  const ase = data.filter(d => d.tipo !== 'lider' && d.estado !== 'inasistente').sort((a,b) => a.orden - b.orden);
+  document.getElementById('cntAse').textContent = ase.length;
+  document.getElementById('listAse').innerHTML = ase.map(d => renderCard(d)).join('');
+  
+  // Setup drag
+  setTimeout(setupDrag, 10);
+}
+
+function renderCard(d) {
+  const codes = d.codigos.split(',').map(c => c.trim()).filter(c => c);
+  const isDup = checkDup(codes);
+  const isNew = d.isNew;
+  
+  return `
+    <div class="card ${isDup ? 'dup' : ''}" data-id="${d.id}">
+      <div class="handle"><span></span><span></span><span></span></div>
+      <div class="status ${d.estado}" onclick="toggleStatus('${d.id}')">
+        ${d.estado === 'asistente' ? '✅' : d.estado === 'inasistente' ? '❌' : '⚠️'}
+      </div>
+      <div class="info">
+        <div class="info-row">
+          <input class="name-input" value="${esc(d.nombre)}" placeholder="Nombre" 
+                 onblur="updateField('${d.id}','nombre',this.value)">
+          ${d.tipo === 'lider' ? '<span class="badge lider">Líder</span>' : ''}
+          ${d.tipo === 'ojt' ? '<span class="badge ojt">OJT</span>' : ''}
+          ${isDup ? '<span class="badge dup">DUP</span>' : ''}
         </div>
-      `).join('');
-    }
-    
-    function renderInasistencias() {
-      const list = document.getElementById('listInasistencias');
-      const items = state.asesores
-        .filter(a => a.estado === 'inasistente')
-        .sort((a, b) => (a.orden || 0) - (b.orden || 0));
-      
-      document.getElementById('countInasistencias').textContent = items.length;
-      
-      if (items.length === 0) {
-        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div>Sin inasistencias</div>';
-        return;
-      }
-      
-      list.innerHTML = items.map(a => renderCard(a)).join('');
-    }
-    
-    function renderLideres() {
-      const list = document.getElementById('listLideres');
-      const items = state.asesores
-        .filter(a => a.tipo === 'lider' && a.estado !== 'inasistente')
-        .sort((a, b) => (a.orden || 0) - (b.orden || 0));
-      
-      document.getElementById('countLideres').textContent = items.length;
-      
-      if (items.length === 0) {
-        list.innerHTML = '<div class="empty-state">Sin líderes</div>';
-        return;
-      }
-      
-      list.innerHTML = items.map(a => renderLiderCard(a)).join('');
-    }
-    
-    function renderAsesores() {
-      const list = document.getElementById('listAsesores');
-      const items = state.asesores
-        .filter(a => a.tipo !== 'lider' && a.estado !== 'inasistente')
-        .sort((a, b) => (a.orden || 0) - (b.orden || 0));
-      
-      document.getElementById('countAsesores').textContent = items.length;
-      
-      list.innerHTML = items.map(a => renderCard(a)).join('');
-    }
-    
-    function renderCard(asesor) {
-      const codigos = asesor.codigos.split(',').map(c => c.trim()).filter(c => c);
-      const isDuplicado = checkDuplicado(codigos);
-      const isEditing = editingCard === asesor.id;
-      const isNew = asesor.isNew;
-      
-      return `
-        <div class="asesor-card ${isDuplicado ? 'duplicado' : ''} ${asesor.prestadoDe ? 'prestado' : ''} ${isEditing ? 'editing' : ''}" 
-             data-id="${asesor.id}">
-          <div class="drag-handle">
-            <span></span><span></span><span></span>
+        <input class="code-input" value="${esc(d.codigos)}" placeholder="Códigos (separar con coma)"
+               onblur="updateField('${d.id}','codigos',this.value)">
+        ${isNew ? `
+          <div class="tipo-sel">
+            <span class="tipo-opt ${d.tipo==='asesor'?'active':''}" onclick="setTipo('${d.id}','asesor')">Asesor</span>
+            <span class="tipo-opt ${d.tipo==='lider'?'active':''}" onclick="setTipo('${d.id}','lider')">Líder</span>
+            <span class="tipo-opt ${d.tipo==='ojt'?'active':''}" onclick="setTipo('${d.id}','ojt')">OJT</span>
           </div>
-          <div class="status-indicator ${asesor.estado}" onclick="toggleEstado('${asesor.id}')">
-            ${getEstadoEmoji(asesor.estado)}
-          </div>
-          <div class="asesor-info">
-            <div class="asesor-name">
-              <input type="text" class="asesor-name-input" 
-                     value="${escapeHtml(asesor.nombre)}" 
-                     placeholder="Nombre del asesor"
-                     onfocus="startEditing('${asesor.id}')"
-                     onblur="handleNameBlur('${asesor.id}', this.value)">
-              ${asesor.tipo === 'ojt' ? '<span class="tipo-badge ojt">OJT</span>' : ''}
-              ${isDuplicado ? '<span class="duplicate-badge">DUP</span>' : ''}
-            </div>
-            <div class="codigos-container">
-              <div class="codigo-input-wrapper">
-                <input type="text" class="codigo-input" 
-                       value="${escapeHtml(asesor.codigos)}" 
-                       placeholder="Códigos (separar con coma)"
-                       onfocus="startEditing('${asesor.id}')"
-                       onblur="handleCodigoBlur('${asesor.id}', this.value)">
-              </div>
-            </div>
-            <input type="text" class="observaciones-input" 
-                   value="${escapeHtml(asesor.observaciones || '')}" 
-                   placeholder="Observaciones..."
-                   onfocus="startEditing('${asesor.id}')"
-                   onblur="handleObsBlur('${asesor.id}', this.value)">
-            ${isEditing || isNew ? `
-              <div class="tipo-selector">
-                <span class="tipo-option ${asesor.tipo === 'asesor' ? 'active' : ''}" 
-                      onclick="setTipo('${asesor.id}', 'asesor')">Asesor</span>
-                <span class="tipo-option ${asesor.tipo === 'lider' ? 'active' : ''}" 
-                      onclick="setTipo('${asesor.id}', 'lider')">Líder</span>
-                <span class="tipo-option ${asesor.tipo === 'ojt' ? 'active' : ''}" 
-                      onclick="setTipo('${asesor.id}', 'ojt')">OJT</span>
-              </div>
-            ` : ''}
-          </div>
-          <div class="card-actions">
-            ${isNew ? `
-              <button class="action-btn save" onclick="saveAsesor('${asesor.id}')">✓</button>
-            ` : ''}
-            <button class="action-btn delete" onclick="deleteAsesor('${asesor.id}')">🗑</button>
-          </div>
-        </div>
-      `;
-    }
-    
-    function renderLiderCard(asesor) {
-      const codigos = asesor.codigos.split(',').map(c => c.trim()).filter(c => c);
-      
-      return `
-        <div class="lider-card" data-id="${asesor.id}">
-          <div class="drag-handle" style="position:absolute;top:8px;right:8px;">
-            <span></span><span></span><span></span>
-          </div>
-          <div class="lider-name">
-            ${getEstadoEmoji(asesor.estado)} 
-            <input type="text" style="background:transparent;border:none;color:#b45309;font-weight:700;font-size:14px;width:100%;outline:none;" 
-                   value="${escapeHtml(asesor.nombre)}"
-                   onblur="handleNameBlur('${asesor.id}', this.value)">
-          </div>
-          <div class="lider-codigos">
-            ${codigos.map(c => `<span class="lider-codigo">${c}</span>`).join('')}
-            <input type="text" class="lider-codigo" style="background:transparent;border:1px dashed rgba(180,83,9,0.3);"
-                   value="${escapeHtml(asesor.codigos)}" placeholder="Códigos..."
-                   onblur="handleCodigoBlur('${asesor.id}', this.value)">
-          </div>
-          <button class="action-btn delete" style="position:absolute;bottom:8px;right:8px;" 
-                  onclick="deleteAsesor('${asesor.id}')">🗑</button>
-        </div>
-      `;
-    }
-    
-    // ============================================
-    // HANDLERS
-    // ============================================
-    function handleNameBlur(id, value) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor || asesor.nombre === value.trim()) return;
-      
-      if (!asesor.isNew) {
-        updateAsesorField(id, 'nombre', value.trim());
-      }
-    }
-    
-    function handleCodigoBlur(id, value) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor || asesor.codigos === value.trim()) return;
-      
-      if (!asesor.isNew) {
-        updateAsesorField(id, 'codigos', value.trim());
-        render(); // Re-render para actualizar duplicados
-      }
-    }
-    
-    function handleObsBlur(id, value) {
-      const asesor = state.asesores.find(a => a.id === id);
-      if (!asesor || asesor.observaciones === value.trim()) return;
-      
-      if (!asesor.isNew) {
-        updateAsesorField(id, 'observaciones', value.trim());
-      }
-    }
-    
-    // ============================================
-    // UTILIDADES
-    // ============================================
-    function getEstadoEmoji(estado) {
-      switch(estado) {
-        case 'asistente': return '✅';
-        case 'inasistente': return '❌';
-        case 'sin-codigo': return '⚠️';
-        default: return '✅';
-      }
-    }
-    
-    function getEstadoText(estado) {
-      switch(estado) {
-        case 'asistente': return 'Asistente';
-        case 'inasistente': return 'Inasistente';
-        case 'sin-codigo': return 'Sin código';
-        default: return estado;
-      }
-    }
-    
-    function checkDuplicado(codigos) {
-      const allCodigos = {};
-      state.asesores.forEach(a => {
-        if (a.estado === 'inasistente') return;
-        a.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c).forEach(c => {
-          allCodigos[c] = (allCodigos[c] || 0) + 1;
-        });
-      });
-      
-      return codigos.some(c => allCodigos[c.toLowerCase()] > 1);
-    }
-    
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    
-    function toggleSection(name) {
-      const section = document.getElementById('section' + capitalize(name));
-      const dropZone = section.querySelector('.drop-zone');
-      const toggle = section.querySelector('.section-toggle');
-      
-      if (dropZone.style.display === 'none') {
-        dropZone.style.display = '';
-        toggle.textContent = '▼';
-      } else {
-        dropZone.style.display = 'none';
-        toggle.textContent = '▶';
-      }
-    }
-    
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-    
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.innerHTML = `
-        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-        <span>${message}</span>
-      `;
-      container.appendChild(toast);
-      
-      setTimeout(() => toast.remove(), 3000);
-    }
-  </script>
+        ` : ''}
+      </div>
+      <div class="actions">
+        ${isNew ? `<button class="btn save" onclick="saveNew('${d.id}')">✓</button>` : ''}
+        <button class="btn del" onclick="confirmDel('${d.id}')">🗑</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderLeader(d) {
+  const codes = d.codigos.split(',').map(c => c.trim()).filter(c => c);
+  
+  return `
+    <div class="leader-card" data-id="${d.id}">
+      <div class="leader-handle handle"><span></span><span></span><span></span></div>
+      <div class="leader-name">
+        ${d.estado === 'asistente' ? '✅' : '⚠️'}
+        <input style="background:transparent;border:none;color:#b45309;font-weight:700;font-size:12px;flex:1;outline:none;" 
+               value="${esc(d.nombre)}" onblur="updateField('${d.id}','nombre',this.value)">
+      </div>
+      <div class="leader-codes">
+        ${codes.map(c => `<span class="leader-code">${c}</span>`).join('') || '<span style="opacity:0.5;font-size:10px;">Sin código</span>'}
+      </div>
+      <input style="background:transparent;border:1px dashed rgba(180,83,9,0.3);border-radius:4px;padding:2px 6px;font-size:10px;color:#b45309;width:100%;margin-top:4px;outline:none;"
+             value="${esc(d.codigos)}" placeholder="Códigos" onblur="updateField('${d.id}','codigos',this.value)">
+      <button class="leader-del" onclick="confirmDel('${d.id}')">🗑</button>
+    </div>
+  `;
+}
+
+function checkDup(codes) {
+  const all = {};
+  data.forEach(d => {
+    if (d.estado === 'inasistente') return;
+    d.codigos.split(',').map(c => c.trim().toLowerCase()).filter(c => c).forEach(c => {
+      all[c] = (all[c] || 0) + 1;
+    });
+  });
+  return codes.some(c => all[c.toLowerCase()] > 1);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function toggle(sec) {
+  const zone = document.getElementById('drop' + sec.charAt(0).toUpperCase() + sec.slice(1));
+  const btn = zone.parentElement.querySelector('.section-toggle');
+  if (zone.style.display === 'none') {
+    zone.style.display = '';
+    btn.textContent = '▼';
+  } else {
+    zone.style.display = 'none';
+    btn.textContent = '▶';
+  }
+}
+
+function toast(msg, type = 'ok') {
+  const box = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `${type === 'ok' ? '✅' : type === 'error' ? '❌' : '⚠️'} ${msg}`;
+  box.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
+
 </body>
 </html>
