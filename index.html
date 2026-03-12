@@ -660,7 +660,7 @@
 // ============================================
 // CONFIG
 // ============================================
-const API = "https://script.google.com/macros/s/AKfycbxgz0yIfmySUmgw-CZ2j1dNnHjsnnqg9hMSU63rva_q1soxojTalm2Bxlzyl75GVhTp/exec";
+const API = "https://script.google.com/macros/s/AKfycbxH31zP4-K9foTHhOP7JB_pw4zN4TmrqSnNCDCvq_-IHJR-qicPlLWdnW96YLlwhbpt/exec";
 
 // ============================================
 // STATE
@@ -684,9 +684,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast('Sin conexión - modo offline', 'warn');
   }
   
-  // Auto sync
-  setInterval(processPending, 3000);
-  setInterval(backgroundSync, 10000);
+  // Auto sync desactivado - usar botón manual
+  setInterval(processPending, 5000);
 });
 
 // ============================================
@@ -754,17 +753,7 @@ async function fullSync() {
 }
 
 async function backgroundSync() {
-  if (!navigator.onLine || syncing) return;
-  try {
-    const r = await fetch(API + '?action=full');
-    const j = await r.json();
-    if (j.data) {
-      data = j.data;
-      config = j.config || config;
-      saveLocal();
-      render();
-    }
-  } catch(e) {}
+  // Desactivado - solo sincronizar manualmente con el botón
 }
 
 async function forceSync() {
@@ -801,13 +790,18 @@ async function processPending() {
     const op = pending[0];
     
     try {
-      const r = await fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(op)
-      });
+      // Construir URL con parámetros GET
+      const params = new URLSearchParams();
+      for (const key in op) {
+        if (op[key] !== undefined && op[key] !== null) {
+          params.append(key, op[key]);
+        }
+      }
       
+      const url = API + '?' + params.toString();
+      const r = await fetch(url, { method: 'GET' });
       const j = await r.json();
+      
       console.log('Response:', j);
       
       if (j.status === 'error') {
@@ -815,12 +809,12 @@ async function processPending() {
         toast('Error: ' + j.message, 'error');
         pending.shift();
       } else {
-        // Success - update temp ID if needed
         if (op.action === 'add' && j.id && op.tempId) {
           const idx = data.findIndex(d => d.id === op.tempId);
           if (idx > -1) data[idx].id = j.id;
         }
         pending.shift();
+        toast('Guardado en servidor');
       }
       
       saveLocal();
